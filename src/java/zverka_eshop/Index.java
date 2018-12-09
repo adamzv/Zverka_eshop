@@ -17,7 +17,7 @@ import javax.servlet.http.HttpServletResponse;
  *
  * @author adamzv
  */
-@WebServlet(name = "Index", urlPatterns = {"/"})
+@WebServlet(name = "Index", urlPatterns = {"/index/*"})
 public class Index extends HttpServlet {
 
     /**
@@ -32,10 +32,11 @@ public class Index extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
+        String path = request.getPathInfo();
         try (PrintWriter out = response.getWriter()) {
             Layout.vypis_html(Layout.ZACIATOK_HTML, out, "Index");
             Layout.vypis_navbar(out);
-            Main.vypis_index(out);
+            Main.vypis_index(out, path);
             Layout.vypis_footer(out);
             Layout.vypis_html(Layout.KONIEC_HTML, out);
         }
