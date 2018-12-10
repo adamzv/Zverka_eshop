@@ -64,9 +64,10 @@ public class Login extends HttpServlet {
             throws ServletException, IOException {
         
         if (request.getMethod().equals("POST")) {
-            System.out.println("OK");
             String username = request.getParameter("username");
             String heslo = request.getParameter("heslo");
+            
+            session = request.getSession();
             
             if (user_id == 0) {
                 user_id = OverUsera(username, heslo);
@@ -74,6 +75,7 @@ public class Login extends HttpServlet {
                     response.sendRedirect("/login");
                 }
                 ZapamatajUdajeOUserovi(user_id);
+                response.sendRedirect("/index");
             }
         }
         
@@ -93,11 +95,11 @@ public class Login extends HttpServlet {
             String SQL = "SELECT MAX(ID) AS iid, COUNT(ID) AS pocet FROM pouzivatelia "
                     + "WHERE login = ? AND heslo = ?";
             pstmt = con.prepareStatement(SQL);
-            pstmt.setString(0, username);
-            pstmt.setString(1, heslo);
+            pstmt.setString(1, username);
+            pstmt.setString(2, heslo);
             rs = pstmt.executeQuery();
             
-            rs.first();
+            rs.next();
             if (rs.getInt("pocet") == 1) {
                 vysledok = rs.getInt("iid");
             }
@@ -108,16 +110,17 @@ public class Login extends HttpServlet {
         return vysledok;
     }
     
-    private void ZapamatajUdajeOUserovi(Integer user_id) {
+    private void ZapamatajUdajeOUserovi(int id) {
         try {
             // dopisat dalsie udaje do session?
             pstmt = con.prepareStatement("SELECT login FROM pouzivatelia WHERE ID = ?");
-            pstmt.setInt(0, user_id);
+            pstmt.setString(1, String.valueOf(id));
             rs = pstmt.executeQuery();
             
-            rs.first();
+            rs.next();
+            System.out.println("Zap user_id: " + id);
             
-            session.setAttribute("user_id", (Integer) user_id);
+            session.setAttribute("user_id", (Integer) id);
             session.setAttribute("username", rs.getString("login"));
             
             pstmt.close();
