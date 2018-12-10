@@ -7,11 +7,20 @@ package zverka_eshop;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 /**
  *
@@ -20,6 +29,28 @@ import javax.servlet.http.HttpServletResponse;
 @WebServlet(name = "Login", urlPatterns = {"/login"})
 public class Login extends HttpServlet {
 
+    String driver = "com.mysql.jdbc.Driver";
+    Connection con = null;
+    PreparedStatement pstmt = null;
+    ResultSet rs = null;
+    String db_username = "root";
+    String db_password = "";
+    String URL = "jdbc:mysql://localhost/zverka_eshop";
+    
+    HttpSession session;
+    Integer user_id = 0;
+    
+    @Override
+    public void init() {
+        try {
+            super.init();
+            Class.forName(driver);
+            con = DriverManager.getConnection(URL, db_username, db_password);
+        } catch (Exception ex) {
+            
+        }
+    }
+    
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
@@ -31,6 +62,21 @@ public class Login extends HttpServlet {
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        
+        if (request.getMethod().equals("POST")) {
+            System.out.println("OK");
+            String username = request.getParameter("username");
+            String heslo = request.getParameter("heslo");
+            
+            if (user_id == 0) {
+                user_id = OverUsera(username, heslo);
+                if (user_id == 0) {
+                    response.sendRedirect("/login");
+                }
+                ZapamatajUdajeOUserovi(user_id);
+            }
+        }
+        
         response.setContentType("text/html;charset=UTF-8");
         try (PrintWriter out = response.getWriter()) {
             Layout.vypis_html(Layout.ZACIATOK_HTML, out, "Login");
@@ -41,6 +87,44 @@ public class Login extends HttpServlet {
         }
     }
 
+    private Integer OverUsera(String username, String heslo) {
+        int vysledok = 0;
+        try {
+            String SQL = "SELECT MAX(ID) AS iid, COUNT(ID) AS pocet FROM pouzivatelia "
+                    + "WHERE login = ? AND heslo = ?";
+            pstmt = con.prepareStatement(SQL);
+            pstmt.setString(0, username);
+            pstmt.setString(1, heslo);
+            rs = pstmt.executeQuery();
+            
+            rs.first();
+            if (rs.getInt("pocet") == 1) {
+                vysledok = rs.getInt("iid");
+            }
+            pstmt.close();
+        } catch (Exception ex) {
+            return 0;
+        }
+        return vysledok;
+    }
+    
+    private void ZapamatajUdajeOUserovi(Integer user_id) {
+        try {
+            // dopisat dalsie udaje do session?
+            pstmt = con.prepareStatement("SELECT login FROM pouzivatelia WHERE ID = ?");
+            pstmt.setInt(0, user_id);
+            rs = pstmt.executeQuery();
+            
+            rs.first();
+            
+            session.setAttribute("user_id", (Integer) user_id);
+            session.setAttribute("username", rs.getString("login"));
+            
+            pstmt.close();
+        } catch (SQLException ex) {
+        }
+    }
+    
     private void vypis_login(PrintWriter out) {
         out.println("    <form action=\"/login\" method=\"post\">");
         out.println("        <div class=\"form-row\">");
@@ -51,7 +135,7 @@ public class Login extends HttpServlet {
         out.println("        </div>");
         out.println("        <div class=\"form-row\">");
         out.println("            <div class=\"col-md-4 mx-auto my-1\">");
-        out.println("                <input class=\"form-control\" name=\"password\" placeholder=\"Heslo\" type=\"password\"/>");
+        out.println("                <input class=\"form-control\" name=\"heslo\" placeholder=\"Heslo\" type=\"password\"/>");
         out.println("            </div>");
         out.println("        </div>");
         out.println("        <div class=\"form-row\">");

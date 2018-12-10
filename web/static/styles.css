@@ -13,3 +13,15 @@ nav .navbar-brand
     font-size: xx-large;
 }
 
+main .form-control
+{
+    display: inline-block;
+
+}
+
+main
+{
+    overflow-x: auto;
+
+    text-align: center;
+}

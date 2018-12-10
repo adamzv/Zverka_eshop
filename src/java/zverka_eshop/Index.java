@@ -22,6 +22,8 @@ import javax.servlet.http.HttpSession;
 public class Index extends HttpServlet {
     
     HttpSession session;
+    Integer user_id = 0;
+    String username = null;
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -39,24 +41,27 @@ public class Index extends HttpServlet {
         session = request.getSession();
         
         // skontroluje, či je používateľ prihlásený, ak nie je tak ho pošle na login servlet
-        String user = (String) session.getAttribute("user_id");
+        Integer user = (Integer) session.getAttribute("user_id");
         if (user == null) {
             response.sendRedirect("/login");
+        } else {
+            user_id = user;
+            username = (String) session.getAttribute("username");
         }
         
         String path = request.getPathInfo();
         try (PrintWriter out = response.getWriter()) {
             Layout.vypis_html(Layout.ZACIATOK_HTML, out, "Index");
             Layout.vypis_navbar(out);
-            vypis_index(out, path);
+            vypis_index(out, username);
             Layout.vypis_footer(out);
             Layout.vypis_html(Layout.KONIEC_HTML, out);
         }
     }
 
-    public static void vypis_index(PrintWriter out, String path) {
+    public static void vypis_index(PrintWriter out, String username) {
         out.println("    <div class=\"jumbotron\">");
-        out.println("        <h1 class=\"display-4\">Lorem Ipsum " + path + "</h1>");
+        out.println("        <h1 class=\"display-4\">Lorem Ipsum " + username + "</h1>");
         out.println("        <p class=\"lead\">This is a simple hero unit, a simple jumbotron-style component for calling extra attention to featured content or information.</p>");
         out.println("        <hr class=\"my-4\">");
         out.println("        <p>It uses utility classes for typography and spacing to space content out within the larger container.</p>");
