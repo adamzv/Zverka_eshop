@@ -114,7 +114,7 @@ public class Login extends HttpServlet {
     private void ZapamatajUdajeOUserovi(int id) {
         try {
             // dopisat dalsie udaje do session?
-            pstmt = con.prepareStatement("SELECT login FROM pouzivatelia WHERE ID = ?");
+            pstmt = con.prepareStatement("SELECT login, prava FROM pouzivatelia WHERE ID = ?");
             pstmt.setString(1, String.valueOf(id));
             rs = pstmt.executeQuery();
             
@@ -123,6 +123,7 @@ public class Login extends HttpServlet {
             
             session.setAttribute("user_id", (Integer) id);
             session.setAttribute("username", rs.getString("login"));
+            session.setAttribute("prava", rs.getString("prava"));
             
             pstmt.close();
         } catch (SQLException ex) {
@@ -146,7 +147,7 @@ public class Login extends HttpServlet {
         out.println("            <div class=\"mx-auto\">");
         out.println("                <button class=\"btn btn-primary m-1\" type=\"submit\">Prihlásiť sa</button>");
         out.println("                <p class=\"m-1\">");
-        out.println("                    <a href=\"/register\">Vytvoriť nový účet</a>");
+        out.println("                    <a href=\"/registracia\">Vytvoriť nový účet</a>");
         out.println("                </p>");
         out.println("            </div>");
         out.println("        </div>");
