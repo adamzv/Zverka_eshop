@@ -86,7 +86,7 @@ public class Login extends HttpServlet {
         response.setContentType("text/html;charset=UTF-8");
         try (PrintWriter out = response.getWriter()) {
             Layout.vypis_html(Layout.ZACIATOK_HTML, out, "Login");
-            Layout.vypis_navbar(out);
+            Layout.vypis_navbar(out, session);
             vypis_login(out);
             Layout.vypis_footer(out);
             Layout.vypis_html(Layout.KONIEC_HTML, out);

@@ -52,7 +52,7 @@ public class Index extends HttpServlet {
         String path = request.getPathInfo();
         try (PrintWriter out = response.getWriter()) {
             Layout.vypis_html(Layout.ZACIATOK_HTML, out, "Index");
-            Layout.vypis_navbar(out);
+            Layout.vypis_navbar(out, session);
             vypis_index(out, username);
             Layout.vypis_footer(out);
             Layout.vypis_html(Layout.KONIEC_HTML, out);

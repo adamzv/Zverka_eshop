@@ -6,6 +6,7 @@
 package zverka_eshop;
 
 import java.io.PrintWriter;
+import javax.servlet.http.HttpSession;
 
 /**
  *
@@ -23,10 +24,10 @@ public class Layout {
     }
 
     public static void vypis_html(int mod, PrintWriter out, String title) {
-        private_vypis_html(mod, out, title);
+        private_vypis_html(mod, out, "jShop Zverka | " + title);
     }
 
-    public static void vypis_navbar(PrintWriter out) {
+    public static void vypis_navbar(PrintWriter out, HttpSession session) {
         out.println("<nav class=\"navbar navbar-expand-md navbar-light bg-light border\">");
         out.println("    <a class=\"navbar-brand\" href=\"/\">jShop Zverka</a>");
         out.println("    <button aria-controls=\"navbar\" aria-expanded=\"false\" aria-label=\"Toggle navigation\" class=\"navbar-toggler\"");
@@ -34,15 +35,21 @@ public class Layout {
         out.println("        <span class=\"navbar-toggler-icon\"></span>");
         out.println("    </button>");
         out.println("    <div class=\"collapse navbar-collapse\" id=\"navbar\">");
-        out.println("            <ul class=\"navbar-nav mr-auto mt-2\">");
-        out.println("                <li class=\"nav-item\"><a class=\"nav-link\" href=\"/ponuka\">Ponuka</a></li>");
-        out.println("                <li class=\"nav-item\"><a class=\"nav-link\" href=\"/kosik\">Košík</a></li>");
-        out.println("                <li class=\"nav-item\"><a class=\"nav-link\" href=\"/objednavky\">Objednávky</a></li>");
-        out.println("            </ul>");
+        if (session.getAttribute("user_id") != null) {
+            out.println("            <ul class=\"navbar-nav mr-auto mt-2\">");
+            out.println("                <li class=\"nav-item\"><a class=\"nav-link\" href=\"/ponuka\">Ponuka</a></li>");
+            out.println("                <li class=\"nav-item\"><a class=\"nav-link\" href=\"/kosik\">Košík</a></li>");
+            out.println("                <li class=\"nav-item\"><a class=\"nav-link\" href=\"/objednavky\">Objednávky</a></li>");
+            out.println("            </ul>");
+        }
         out.println();
         out.println("            <ul class=\"navbar-nav ml-auto mt-2\">");
-        out.println("                <li class=\"nav-item\"><a class=\"nav-link\" href=\"/login\">Prihlásiť sa</a></li>");
-        out.println("                <li class=\"nav-item\"><a class=\"nav-link\" href=\"/logout\">Odhlásiť sa</a></li>");
+        if (session.getAttribute("user_id") != null) {
+            out.println("                <li class=\"nav-item\"><a class=\"nav-link\" href=\"#\">" + session.getAttribute("username") + "</a></li>");
+            out.println("                <li class=\"nav-item\"><a class=\"nav-link\" href=\"/logout\">Odhlásiť sa</a></li>");
+        } else {
+            out.println("                <li class=\"nav-item\"><a class=\"nav-link\" href=\"/login\">Prihlásiť sa</a></li>");
+        }
         out.println("            </ul>");
         out.println("    </div>");
         out.println("</nav>");
