@@ -12,9 +12,6 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -26,7 +23,7 @@ import javax.servlet.http.HttpSession;
  *
  * @author adamz
  */
-@WebServlet(name = "Login", urlPatterns = {"","/","/login"})
+@WebServlet(name = "Login", urlPatterns = {"","/login"})
 public class Login extends HttpServlet {
 
     String driver = "com.mysql.jdbc.Driver";
