@@ -42,6 +42,7 @@ public class Layout {
         out.println();
         out.println("            <ul class=\"navbar-nav ml-auto mt-2\">");
         out.println("                <li class=\"nav-item\"><a class=\"nav-link\" href=\"/login\">Prihlásiť sa</a></li>");
+        out.println("                <li class=\"nav-item\"><a class=\"nav-link\" href=\"/logout\">Odhlásiť sa</a></li>");
         out.println("            </ul>");
         out.println("    </div>");
         out.println("</nav>");
