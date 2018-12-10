@@ -26,7 +26,7 @@ import javax.servlet.http.HttpSession;
  *
  * @author adamz
  */
-@WebServlet(name = "Login", urlPatterns = {"/login"})
+@WebServlet(name = "Login", urlPatterns = {"","/","/login"})
 public class Login extends HttpServlet {
 
     String driver = "com.mysql.jdbc.Driver";
@@ -63,11 +63,11 @@ public class Login extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         
+        session = request.getSession();
+        
         if (request.getMethod().equals("POST")) {
             String username = request.getParameter("username");
             String heslo = request.getParameter("heslo");
-            
-            session = request.getSession();
             
             if (user_id == 0) {
                 user_id = OverUsera(username, heslo);
@@ -75,6 +75,10 @@ public class Login extends HttpServlet {
                     response.sendRedirect("/login");
                 }
                 ZapamatajUdajeOUserovi(user_id);
+                response.sendRedirect("/index");
+            }
+        } else {
+            if (session.getAttribute("user_id") != null) {
                 response.sendRedirect("/index");
             }
         }
