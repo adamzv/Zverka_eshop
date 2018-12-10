@@ -12,16 +12,13 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
 /**
  *
- * @author adamzv
+ * @author adamz
  */
-@WebServlet(name = "Index", urlPatterns = {"/index/*"})
-public class Index extends HttpServlet {
-    
-    HttpSession session;
+@WebServlet(name = "Login", urlPatterns = {"/login"})
+public class Login extends HttpServlet {
 
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -35,34 +32,39 @@ public class Index extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
-        
-        session = request.getSession();
-        
-        // skontroluje, či je používateľ prihlásený, ak nie je tak ho pošle na login servlet
-        String user = (String) session.getAttribute("user_id");
-        if (user == null) {
-            response.sendRedirect("/login");
-        }
-        
-        String path = request.getPathInfo();
         try (PrintWriter out = response.getWriter()) {
-            Layout.vypis_html(Layout.ZACIATOK_HTML, out, "Index");
+            Layout.vypis_html(Layout.ZACIATOK_HTML, out, "Login");
             Layout.vypis_navbar(out);
-            vypis_index(out, path);
+            vypis_login(out);
             Layout.vypis_footer(out);
             Layout.vypis_html(Layout.KONIEC_HTML, out);
         }
     }
 
-    public static void vypis_index(PrintWriter out, String path) {
-        out.println("    <div class=\"jumbotron\">");
-        out.println("        <h1 class=\"display-4\">Lorem Ipsum " + path + "</h1>");
-        out.println("        <p class=\"lead\">This is a simple hero unit, a simple jumbotron-style component for calling extra attention to featured content or information.</p>");
-        out.println("        <hr class=\"my-4\">");
-        out.println("        <p>It uses utility classes for typography and spacing to space content out within the larger container.</p>");
-        out.println("    </div>");
+    private void vypis_login(PrintWriter out) {
+        out.println("    <form action=\"/login\" method=\"post\">");
+        out.println("        <div class=\"form-row\">");
+        out.println("            <div class=\"col-md-4 mx-auto my-1\">");
+        out.println("                <input autocomplete=\"off\" autofocus class=\"form-control\" name=\"username\" placeholder=\"Prihlasovacie meno\"");
+        out.println("                       type=\"text\"/>");
+        out.println("            </div>");
+        out.println("        </div>");
+        out.println("        <div class=\"form-row\">");
+        out.println("            <div class=\"col-md-4 mx-auto my-1\">");
+        out.println("                <input class=\"form-control\" name=\"password\" placeholder=\"Heslo\" type=\"password\"/>");
+        out.println("            </div>");
+        out.println("        </div>");
+        out.println("        <div class=\"form-row\">");
+        out.println("            <div class=\"mx-auto\">");
+        out.println("                <button class=\"btn btn-primary m-1\" type=\"submit\">Prihlásiť sa</button>");
+        out.println("                <p class=\"m-1\">");
+        out.println("                    <a href=\"/register\">Vytvoriť nový účet</a>");
+        out.println("                </p>");
+        out.println("            </div>");
+        out.println("        </div>");
+        out.println("    </form>");
     }
-    
+
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
     /**
      * Handles the HTTP <code>GET</code> method.
