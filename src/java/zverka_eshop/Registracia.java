@@ -32,16 +32,63 @@ public class Registracia extends HttpServlet {
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        
+
         HttpSession session = request.getSession();
-        
+
         response.setContentType("text/html;charset=UTF-8");
         try (PrintWriter out = response.getWriter()) {
             Layout.vypis_html(Layout.ZACIATOK_HTML, out, "Registracia");
             Layout.vypis_navbar(out, session);
+            vypis_registraciu(out);
             Layout.vypis_footer(out);
             Layout.vypis_html(Layout.KONIEC_HTML, out);
         }
+    }
+
+    private void vypis_registraciu(PrintWriter out) {
+        out.println("    <form action=\"/register\" method=\"post\">");
+        out.println("        <div class=\"form-row\">");
+        out.println("            <div class=\"col-md-4 mx-auto my-1\">");
+        out.println("                <input autocomplete=\"off\" autofocus class=\"form-control\" name=\"username\" placeholder=\"Prihlasovacie meno\"");
+        out.println("                       type=\"text\"/>");
+        out.println("            </div>");
+        out.println("        </div>");
+        out.println("        <div class=\"form-row\">");
+        out.println("            <div class=\"col-md-4 mx-auto my-1\">");
+        out.println("                <input class=\"form-control\" name=\"heslo\" placeholder=\"Heslo\" type=\"password\"/>");
+        out.println("            </div>");
+        out.println("        </div>");
+        out.println("        <div class=\"form-row\">");
+        out.println("            <div class=\"col-md-4 mx-auto my-1\">");
+        out.println("                <input autocomplete=\"off\" autofocus class=\"form-control\" name=\"mail\" placeholder=\"Mail\"");
+        out.println("                       type=\"email\"/>");
+        out.println("            </div>");
+        out.println("        </div>");
+        out.println("        <div class=\"form-row\">");
+        out.println("            <div class=\"col-md-4 mx-auto my-1\">");
+        out.println("                <input autocomplete=\"off\" autofocus class=\"form-control\" name=\"adresa\" placeholder=\"Adresa\"");
+        out.println("                       type=\"text\"/>");
+        out.println("            </div>");
+        out.println("        </div>");
+        out.println("        <div class=\"form-row\">");
+        out.println("            <div class=\"col-md-4 mx-auto my-1\">");
+        out.println("                <input autocomplete=\"off\" autofocus class=\"form-control\" name=\"meno\" placeholder=\"Meno\"");
+        out.println("                       type=\"text\"/>");
+        out.println("            </div>");
+        out.println("        </div>");
+        out.println("        <div class=\"form-row\">");
+        out.println("            <div class=\"col-md-4 mx-auto my-1\">");
+        out.println("                <input autocomplete=\"off\" autofocus class=\"form-control\" name=\"priezvisko\" placeholder=\"Priezvisko\"");
+        out.println("                       type=\"text\"/>");
+        out.println("            </div>");
+        out.println("        </div>");
+        out.println("        <div class=\"form-row\">");
+        out.println("            <div class=\"mx-auto\">");
+        out.println("                <button class=\"btn btn-primary m-1\" type=\"submit\">Register</button>");
+        out.println();
+        out.println("            </div>");
+        out.println("        </div>");
+        out.println("    </form>");
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
