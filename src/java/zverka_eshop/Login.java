@@ -12,6 +12,8 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -45,6 +47,15 @@ public class Login extends HttpServlet {
             con = DriverManager.getConnection(URL, db_username, db_password);
         } catch (Exception ex) {
             
+        }
+    }
+
+    @Override
+    public void destroy() {
+        super.destroy();
+        try {
+            con.close();
+        } catch (SQLException ex) {
         }
     }
     
@@ -131,6 +142,12 @@ public class Login extends HttpServlet {
     }
     
     private void vypis_login(PrintWriter out) {
+        if (session.getAttribute("sprava") != null) {
+            out.println("    <div class=\"alert alert-primary\" role=\"alert\">");
+            out.println(session.getAttribute("sprava"));
+            out.println("    </div>");
+            session.removeAttribute("sprava");
+        }
         out.println("    <form action=\"/login\" method=\"post\">");
         out.println("        <div class=\"form-row\">");
         out.println("            <div class=\"col-md-4 mx-auto my-1\">");
