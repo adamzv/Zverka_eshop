@@ -37,6 +37,7 @@ public class Login extends HttpServlet {
     String URL = "jdbc:mysql://localhost/zverka_eshop";
     
     HttpSession session;
+
     Integer user_id = 0;
     
     @Override
@@ -46,7 +47,7 @@ public class Login extends HttpServlet {
             Class.forName(driver);
             con = DriverManager.getConnection(URL, db_username, db_password);
         } catch (Exception ex) {
-            
+            ex.printStackTrace();
         }
     }
 
@@ -58,7 +59,6 @@ public class Login extends HttpServlet {
         } catch (SQLException ex) {
         }
     }
-    
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
@@ -72,12 +72,15 @@ public class Login extends HttpServlet {
             throws ServletException, IOException {
         
         session = request.getSession();
-        
+        if (session.isNew()) {
+            user_id = 0;
+        }
         if (request.getMethod().equals("POST")) {
             String username = request.getParameter("username");
             String heslo = request.getParameter("heslo");
-            
+            System.out.println("user_id "+ user_id );
             if (user_id == 0) {
+                System.out.println("Som tu?");
                 user_id = OverUsera(username, heslo);
                 if (user_id == 0) {
                     response.sendRedirect("/login");
@@ -117,6 +120,7 @@ public class Login extends HttpServlet {
             }
             pstmt.close();
         } catch (Exception ex) {
+            ex.printStackTrace();
             return 0;
         }
         return vysledok;
@@ -135,19 +139,14 @@ public class Login extends HttpServlet {
             session.setAttribute("user_id", (Integer) id);
             session.setAttribute("username", rs.getString("login"));
             session.setAttribute("prava", rs.getString("prava"));
-            
+            session.setMaxInactiveInterval(600);
             pstmt.close();
         } catch (SQLException ex) {
+            ex.printStackTrace();
         }
     }
     
     private void vypis_login(PrintWriter out) {
-        if (session.getAttribute("sprava") != null) {
-            out.println("    <div class=\"alert alert-primary\" role=\"alert\">");
-            out.println(session.getAttribute("sprava"));
-            out.println("    </div>");
-            session.removeAttribute("sprava");
-        }
         out.println("    <form action=\"/login\" method=\"post\">");
         out.println("        <div class=\"form-row\">");
         out.println("            <div class=\"col-md-4 mx-auto my-1\">");

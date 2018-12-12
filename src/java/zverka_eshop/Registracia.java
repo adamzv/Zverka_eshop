@@ -14,6 +14,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -69,8 +70,8 @@ public class Registracia extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        session = request.getSession();
-
+        session = request.getSession(false);
+        
         if (request.getMethod().equals("POST")) {
             String username = request.getParameter("username");
             String heslo = request.getParameter("heslo");
@@ -81,40 +82,39 @@ public class Registracia extends HttpServlet {
 
             if (!username.isEmpty() && !heslo.isEmpty() && !mail.isEmpty()
                     && !adresa.isEmpty() && !meno.isEmpty() && !priezvisko.isEmpty()) {
-
                 try {
-                    String kontrola_username = "SELECT ID FROM pouzivatelia WHERE mail = ? OR login = ?";
+                    String kontrola_username = "SELECT COUNT(ID) AS pocet FROM pouzivatelia WHERE mail = ? OR login = ?";
                     pstmt = con.prepareStatement(kontrola_username);
                     pstmt.setString(1, mail);
                     pstmt.setString(2, username);
                     rs = pstmt.executeQuery();
-                    pstmt.close();
-                    if (rs.next()) {
+                    rs.next();
+                    if (rs.getInt("pocet") >= 1) {
                         session.setAttribute("sprava", "Prihlasovacie meno je obsadené");
                         response.sendRedirect("/registracia");
                     } else {
                         int zlava = (int) (Math.random() * 51);
-                        String registracia = "INSERT INTO pouzivatelia (login, heslo, mail, adresa, zlava, meno, priezvisko)"
-                                + "VALUES (?, ?, ?, ?, ?, ?, ?)";
-                        pstmt = con.prepareStatement(registracia);
-                        pstmt.setString(1, username);
-                        pstmt.setString(2, heslo);
-                        pstmt.setString(3, mail);
-                        pstmt.setString(4, adresa);
-                        pstmt.setInt(5, zlava);
-                        pstmt.setString(6, meno);
-                        pstmt.setString(7, priezvisko);
-                        pstmt.executeUpdate();
-                        pstmt.close();
-
-                        session.setAttribute("sprava", "Boli ste úspešne zaregistrovaný.");
+                        String registracia = "INSERT INTO pouzivatelia (login, heslo, mail, adresa, zlava, meno, priezvisko) VALUES (?, ?, ?, ?, ?, ?, ?)";
+                        
+                        PreparedStatement pstmta = con.prepareStatement(registracia);
+                        pstmta.setString(1, username);
+                        pstmta.setString(2, heslo);
+                        pstmta.setString(3, mail);
+                        pstmta.setString(4, adresa);
+                        pstmta.setInt(5, zlava);
+                        pstmta.setString(6, meno);
+                        pstmta.setString(7, priezvisko);
+                        pstmta.executeUpdate();
+                        //con.commit();
+                        pstmta.close();
                         response.sendRedirect("/login");
                     }
+                    pstmt.close();
                 } catch (SQLException ex) {
+                    ex.printStackTrace();
                 }
             } else {
-                session.setAttribute("sprava", "Údaje nemôžu byť prázdne.");
-                response.sendRedirect("/registracia");
+                response.sendRedirect("registracia");
             }
         }
 
@@ -122,19 +122,13 @@ public class Registracia extends HttpServlet {
         try (PrintWriter out = response.getWriter()) {
             Layout.vypis_html(Layout.ZACIATOK_HTML, out, "Registracia");
             Layout.vypis_navbar(out, session);
-            vypis_registraciu(out);
+            vypis_registraciu(out, session);
             Layout.vypis_footer(out);
             Layout.vypis_html(Layout.KONIEC_HTML, out);
         }
     }
 
-    private void vypis_registraciu(PrintWriter out) {
-        if (session.getAttribute("sprava") != null) {
-            out.println("    <div class=\"alert alert-primary\" role=\"alert\">");
-            out.println(session.getAttribute("sprava"));
-            out.println("    </div>");
-            session.removeAttribute("sprava");
-        }
+    private void vypis_registraciu(PrintWriter out, HttpSession session) {
         out.println("    <form action=\"/registracia\" method=\"post\">");
         out.println("        <div class=\"form-row\">");
         out.println("            <div class=\"col-md-4 mx-auto my-1\">");
