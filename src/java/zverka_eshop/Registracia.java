@@ -14,6 +14,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -25,8 +26,8 @@ import javax.servlet.http.HttpSession;
  *
  * @author adamz
  */
-@WebServlet(name = "Login", urlPatterns = {"","/login"})
-public class Login extends HttpServlet {
+@WebServlet(name = "Registracia", urlPatterns = {"/registracia"})
+public class Registracia extends HttpServlet {
 
     String driver = "com.mysql.jdbc.Driver";
     Connection con = null;
@@ -35,11 +36,9 @@ public class Login extends HttpServlet {
     String db_username = "root";
     String db_password = "";
     String URL = "jdbc:mysql://localhost/zverka_eshop";
-    
+
     HttpSession session;
 
-    Integer user_id = 0;
-    
     @Override
     public void init() {
         try {
@@ -47,7 +46,6 @@ public class Login extends HttpServlet {
             Class.forName(driver);
             con = DriverManager.getConnection(URL, db_username, db_password);
         } catch (Exception ex) {
-            ex.printStackTrace();
         }
     }
 
@@ -59,6 +57,7 @@ public class Login extends HttpServlet {
         } catch (SQLException ex) {
         }
     }
+
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
@@ -70,84 +69,67 @@ public class Login extends HttpServlet {
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+
+        session = request.getSession(false);
         
-        session = request.getSession();
-        if (session.isNew()) {
-            user_id = 0;
-        }
         if (request.getMethod().equals("POST")) {
             String username = request.getParameter("username");
             String heslo = request.getParameter("heslo");
-            System.out.println("user_id "+ user_id );
-            if (user_id == 0) {
-                System.out.println("Som tu?");
-                user_id = OverUsera(username, heslo);
-                if (user_id == 0) {
-                    response.sendRedirect("/login");
+            String mail = request.getParameter("mail");
+            String adresa = request.getParameter("adresa");
+            String meno = request.getParameter("meno");
+            String priezvisko = request.getParameter("priezvisko");
+
+            if (!username.isEmpty() && !heslo.isEmpty() && !mail.isEmpty()
+                    && !adresa.isEmpty() && !meno.isEmpty() && !priezvisko.isEmpty()) {
+                try {
+                    String kontrola_username = "SELECT COUNT(ID) AS pocet FROM pouzivatelia WHERE mail = ? OR login = ?";
+                    pstmt = con.prepareStatement(kontrola_username);
+                    pstmt.setString(1, mail);
+                    pstmt.setString(2, username);
+                    rs = pstmt.executeQuery();
+                    rs.next();
+                    if (rs.getInt("pocet") >= 1) {
+                        session.setAttribute("sprava", "Prihlasovacie meno je obsadené");
+                        response.sendRedirect("/registracia");
+                    } else {
+                        int zlava = (int) (Math.random() * 51);
+                        String registracia = "INSERT INTO pouzivatelia (login, heslo, mail, adresa, zlava, meno, priezvisko) VALUES (?, ?, ?, ?, ?, ?, ?)";
+                        
+                        PreparedStatement pstmta = con.prepareStatement(registracia);
+                        pstmta.setString(1, username);
+                        pstmta.setString(2, heslo);
+                        pstmta.setString(3, mail);
+                        pstmta.setString(4, adresa);
+                        pstmta.setInt(5, zlava);
+                        pstmta.setString(6, meno);
+                        pstmta.setString(7, priezvisko);
+                        pstmta.executeUpdate();
+                        //con.commit();
+                        pstmta.close();
+                        response.sendRedirect("/login");
+                    }
+                    pstmt.close();
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
                 }
-                ZapamatajUdajeOUserovi(user_id);
-                response.sendRedirect("/index");
-            }
-        } else {
-            if (session.getAttribute("user_id") != null) {
-                response.sendRedirect("/index");
+            } else {
+                response.sendRedirect("registracia");
             }
         }
-        
+
         response.setContentType("text/html;charset=UTF-8");
         try (PrintWriter out = response.getWriter()) {
-            Layout.vypis_html(Layout.ZACIATOK_HTML, out, "Login");
+            Layout.vypis_html(Layout.ZACIATOK_HTML, out, "Registracia");
             Layout.vypis_navbar(out, session);
-            vypis_login(out);
+            vypis_registraciu(out, session);
             Layout.vypis_footer(out);
             Layout.vypis_html(Layout.KONIEC_HTML, out);
         }
     }
 
-    private Integer OverUsera(String username, String heslo) {
-        int vysledok = 0;
-        try {
-            String SQL = "SELECT MAX(ID) AS iid, COUNT(ID) AS pocet FROM pouzivatelia "
-                    + "WHERE login = ? AND heslo = ?";
-            pstmt = con.prepareStatement(SQL);
-            pstmt.setString(1, username);
-            pstmt.setString(2, heslo);
-            rs = pstmt.executeQuery();
-            
-            rs.next();
-            if (rs.getInt("pocet") == 1) {
-                vysledok = rs.getInt("iid");
-            }
-            pstmt.close();
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            return 0;
-        }
-        return vysledok;
-    }
-    
-    private void ZapamatajUdajeOUserovi(int id) {
-        try {
-            // dopisat dalsie udaje do session?
-            pstmt = con.prepareStatement("SELECT login, prava FROM pouzivatelia WHERE ID = ?");
-            pstmt.setString(1, String.valueOf(id));
-            rs = pstmt.executeQuery();
-            
-            rs.next();
-            System.out.println("Zap user_id: " + id);
-            
-            session.setAttribute("user_id", (Integer) id);
-            session.setAttribute("username", rs.getString("login"));
-            session.setAttribute("prava", rs.getString("prava"));
-            session.setMaxInactiveInterval(600);
-            pstmt.close();
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        }
-    }
-    
-    private void vypis_login(PrintWriter out) {
-        out.println("    <form action=\"/login\" method=\"post\">");
+    private void vypis_registraciu(PrintWriter out, HttpSession session) {
+        out.println("    <form action=\"/registracia\" method=\"post\">");
         out.println("        <div class=\"form-row\">");
         out.println("            <div class=\"col-md-4 mx-auto my-1\">");
         out.println("                <input autocomplete=\"off\" autofocus class=\"form-control\" name=\"username\" placeholder=\"Prihlasovacie meno\"");
@@ -160,11 +142,33 @@ public class Login extends HttpServlet {
         out.println("            </div>");
         out.println("        </div>");
         out.println("        <div class=\"form-row\">");
+        out.println("            <div class=\"col-md-4 mx-auto my-1\">");
+        out.println("                <input autocomplete=\"off\" autofocus class=\"form-control\" name=\"mail\" placeholder=\"Mail\"");
+        out.println("                       type=\"email\"/>");
+        out.println("            </div>");
+        out.println("        </div>");
+        out.println("        <div class=\"form-row\">");
+        out.println("            <div class=\"col-md-4 mx-auto my-1\">");
+        out.println("                <input autocomplete=\"off\" autofocus class=\"form-control\" name=\"adresa\" placeholder=\"Adresa\"");
+        out.println("                       type=\"text\"/>");
+        out.println("            </div>");
+        out.println("        </div>");
+        out.println("        <div class=\"form-row\">");
+        out.println("            <div class=\"col-md-4 mx-auto my-1\">");
+        out.println("                <input autocomplete=\"off\" autofocus class=\"form-control\" name=\"meno\" placeholder=\"Meno\"");
+        out.println("                       type=\"text\"/>");
+        out.println("            </div>");
+        out.println("        </div>");
+        out.println("        <div class=\"form-row\">");
+        out.println("            <div class=\"col-md-4 mx-auto my-1\">");
+        out.println("                <input autocomplete=\"off\" autofocus class=\"form-control\" name=\"priezvisko\" placeholder=\"Priezvisko\"");
+        out.println("                       type=\"text\"/>");
+        out.println("            </div>");
+        out.println("        </div>");
+        out.println("        <div class=\"form-row\">");
         out.println("            <div class=\"mx-auto\">");
-        out.println("                <button class=\"btn btn-primary m-1\" type=\"submit\">Prihlásiť sa</button>");
-        out.println("                <p class=\"m-1\">");
-        out.println("                    <a href=\"/registracia\">Vytvoriť nový účet</a>");
-        out.println("                </p>");
+        out.println("                <button class=\"btn btn-primary m-1\" type=\"submit\">Register</button>");
+        out.println();
         out.println("            </div>");
         out.println("        </div>");
         out.println("    </form>");
