@@ -81,14 +81,14 @@ public class Login extends HttpServlet {
                 System.out.println("Som tu?");
                 user_id = OverUsera(username, heslo);
                 if (user_id == 0) {
-                    response.sendRedirect("/login");
+                    response.sendRedirect("/eshop/login");
                 }
                 ZapamatajUdajeOUserovi(user_id);
-                response.sendRedirect("/index");
+                response.sendRedirect("/eshop/index");
             }
         } else {
             if (session.getAttribute("user_id") != null) {
-                response.sendRedirect("/index");
+                response.sendRedirect("/eshop/index");
             }
         }
         
@@ -145,7 +145,7 @@ public class Login extends HttpServlet {
     }
     
     private void vypis_login(PrintWriter out) {
-        out.println("    <form action=\"/login\" method=\"post\">");
+        out.println("    <form action=\"/eshop/login\" method=\"post\">");
         out.println("        <div class=\"form-row\">");
         out.println("            <div class=\"col-md-4 mx-auto my-1\">");
         out.println("                <input autocomplete=\"off\" autofocus class=\"form-control\" name=\"username\" placeholder=\"Prihlasovacie meno\"");
@@ -154,7 +154,7 @@ public class Login extends HttpServlet {
         out.println("        </div>");
         out.println("        <div class=\"form-row\">");
         out.println("            <div class=\"col-md-4 mx-auto my-1\">");
-        out.println("                <input classjs=\"form-control\" name=\"heslo\" placeholder=\"Heslo\" type=\"password\"/>");
+        out.println("                <input class=\"form-control\" name=\"heslo\" placeholder=\"Heslo\" type=\"password\"/>");
         out.println("            </div>");
         out.println("        </div>");
         out.println("        <div class=\"form-row\">");

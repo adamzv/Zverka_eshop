@@ -78,7 +78,7 @@ public class Index extends HttpServlet {
         // skontroluje, či je používateľ prihlásený, ak nie je tak ho pošle na login servlet
         Integer user = (Integer) session.getAttribute("user_id");
         if (user == null) {
-            response.sendRedirect("/login");
+            response.sendRedirect("/eshop/login");
         } else {
             user_id = user;
             username = (String) session.getAttribute("username");
@@ -118,7 +118,7 @@ public class Index extends HttpServlet {
             rs = stmt.executeQuery("SELECT * FROM sklad");
             while (rs.next()) {
                 out.println("                <tr>");
-                out.println("                    <td><img src=\""+ getServletContext().getContextPath() +"static\\obrazky\\"+ rs.getInt("ID") +".jpg\" height=\"73\"</td>");
+                out.println("                    <td><img src=\""+ getServletContext().getContextPath() +"\\static\\obrazky\\"+ rs.getInt("ID") +".jpg\" height=\"73\"</td>");
                 System.out.println(getServletContext().getContextPath());
                 System.out.println(getServletContext().getContextPath()+"static\\obrazky\\"+ rs.getInt("ID") +".jpg");
                 out.println("                    <td>" + rs.getString("nazov") + "</td>");

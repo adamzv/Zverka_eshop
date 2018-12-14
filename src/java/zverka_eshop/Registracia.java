@@ -88,7 +88,7 @@ public class Registracia extends HttpServlet {
                     rs.next();
                     if (rs.getInt("pocet") >= 1) {
                         session.setAttribute("sprava", "Prihlasovacie meno je obsadené");
-                        response.sendRedirect("/registracia");
+                        response.sendRedirect("/eshop/registracia");
                     } else {
                         int zlava = (int) (Math.random() * 51);
                         String registracia = "INSERT INTO pouzivatelia (login, heslo, mail, adresa, zlava, meno, priezvisko) VALUES (?, ?, ?, ?, ?, ?, ?)";
@@ -104,14 +104,14 @@ public class Registracia extends HttpServlet {
                         pstmta.executeUpdate();
                         //con.commit();
                         pstmta.close();
-                        response.sendRedirect("/login");
+                        response.sendRedirect("/eshop/login");
                     }
                     pstmt.close();
                 } catch (SQLException ex) {
                     ex.printStackTrace();
                 }
             } else {
-                response.sendRedirect("registracia");
+                response.sendRedirect("/eshop/registracia");
             }
         }
 
@@ -126,7 +126,7 @@ public class Registracia extends HttpServlet {
     }
 
     private void vypis_registraciu(PrintWriter out, HttpSession session) {
-        out.println("    <form action=\"/registracia\" method=\"post\">");
+        out.println("    <form action=\"/eshop/registracia\" method=\"post\">");
         out.println("        <div class=\"form-row\">");
         out.println("            <div class=\"col-md-4 mx-auto my-1\">");
         out.println("                <input autocomplete=\"off\" autofocus class=\"form-control\" name=\"username\" placeholder=\"Prihlasovacie meno\"");
