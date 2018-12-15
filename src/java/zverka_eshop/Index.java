@@ -108,8 +108,9 @@ public class Index extends HttpServlet {
         out.println("                <th scope=\"col\">Názov</th>");
         out.println("                <th scope=\"col\">Mierka</th>");
         out.println("                <th scope=\"col\">Výrobca</th>");
-        out.println("                <th scope=\"col\">Počet ks na sklade</th>");
+        out.println("                <th scope=\"col\">Počet ks</th>");
         out.println("                <th scope=\"col\">Cena</th>");
+        out.println("                <th scope=\"col\"></th>");
         out.println("            </tr>");
         out.println("        </thead>");
         out.println("        <tbody>");
@@ -118,14 +119,17 @@ public class Index extends HttpServlet {
             rs = stmt.executeQuery("SELECT * FROM sklad");
             while (rs.next()) {
                 out.println("                <tr>");
-                out.println("                    <td><img src=\""+ getServletContext().getContextPath() +"\\static\\obrazky\\"+ rs.getInt("ID") +".jpg\" height=\"73\"</td>");
-                System.out.println(getServletContext().getContextPath());
-                System.out.println(getServletContext().getContextPath()+"static\\obrazky\\"+ rs.getInt("ID") +".jpg");
+                out.println("                    <td><img src=\"" + getServletContext().getContextPath() + "\\static\\obrazky\\" + rs.getInt("ID") + ".jpg\" height=\"73\"</td>");
                 out.println("                    <td>" + rs.getString("nazov") + "</td>");
                 out.println("                    <td>1:" + rs.getInt("mierka") + "</td>");
                 out.println("                    <td>" + rs.getString("vyrobca") + "</td>");
                 out.println("                    <td>" + rs.getInt("ks") + "</td>");
                 out.println("                    <td>" + rs.getInt("cena") + "€</td>");
+                out.println("    <td><form action=\"/TODO\">");
+                out.println("        <input type=\"number\" name=\"pocet\" class=\"form-control\" min=\"1\" value=\"1\">");
+                out.println("        <input type=\"hidden\" name=\"id_tovaru\" value=\"?\">");
+                out.println("        <button class=\"btn btn-primary m-1\" type=\"submit\">Do košíka</button>");
+                out.println("    </form></td>");
                 out.println("                </tr>");
             }
         } catch (SQLException ex) {
