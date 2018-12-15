@@ -202,6 +202,14 @@ public class Index extends HttpServlet {
                 pstmt.setString(2, id_tovaru);
                 pstmt.setString(3, cena_tovaru);
                 pstmt.setString(4, pocet_ks);
+                
+                pstmt.executeUpdate();
+            } else {
+                pstmt = con.prepareStatement("UPDATE kosik SET ks = ? + 1 where (ID_pouzivatela = ?) AND (ID_tovaru = ?)");
+                pstmt.setString(1, pocet_ks);
+                pstmt.setInt(2, user_id);
+                pstmt.setString(3, id_tovaru);
+                
                 pstmt.executeUpdate();
             }
             
