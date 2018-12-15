@@ -13,6 +13,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -22,10 +24,10 @@ import javax.servlet.http.HttpSession;
 
 /**
  *
- * @author adamzv
+ * @author adamz
  */
-@WebServlet(name = "Index", urlPatterns = {"/index"})
-public class Index extends HttpServlet {
+@WebServlet(name = "Kosik", urlPatterns = {"/kosik"})
+public class Kosik extends HttpServlet {
 
     String driver = "com.mysql.jdbc.Driver";
     Connection con = null;
@@ -59,7 +61,7 @@ public class Index extends HttpServlet {
         } catch (SQLException ex) {
         }
     }
-
+    
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
@@ -71,7 +73,6 @@ public class Index extends HttpServlet {
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        response.setContentType("text/html;charset=UTF-8");
 
         session = request.getSession();
 
@@ -83,68 +84,69 @@ public class Index extends HttpServlet {
             user_id = user;
             username = (String) session.getAttribute("username");
         }
-
+        
+        // ak sem prišiel používate2 cez formulár, tak vymaž danú položku z košíka
         if (request.getMethod().equals("POST")) {
-            ZapisDoKosika(user_id, request.getParameter("id_tovaru"), request.getParameter("cena_tovaru"), request.getParameter("pocet"));
-            // spraví redirect, aby používateľ refreshnutím stránky nepridal ďalší tovar do košíka
-            response.sendRedirect("index");
+            try {
+                pstmt = con.prepareStatement("DELETE FROM kosik WHERE (ID_pouzivatela = ?) AND (ID_tovaru = ?)");
+                pstmt.setInt(1, user_id);
+                System.out.println(request.getParameter("id_tovaru"));
+                pstmt.setString(2, request.getParameter("id_tovaru"));
+                pstmt.executeUpdate();
+                
+                pstmt.close();
+                System.out.println("OK");
+                response.sendRedirect("kosik");
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+            
         }
         
+        response.setContentType("text/html;charset=UTF-8");
+
         try (PrintWriter out = response.getWriter()) {
-            Layout.vypis_html(Layout.ZACIATOK_HTML, out, "Index");
+            Layout.vypis_html(Layout.ZACIATOK_HTML, out, "Košík");
             Layout.vypis_navbar(out, session);
-            vypis_index(out, username);
+            vypis_kosik(out);
             Layout.vypis_footer(out);
             Layout.vypis_html(Layout.KONIEC_HTML, out);
         }
     }
 
-    private void vypis_index(PrintWriter out, String username) {
-        out.println("    <div class=\"jumbotron\">");
-        out.println("        <h1 class=\"display-4\">Lorem Ipsum " + username + "</h1>");
-        out.println("        <p class=\"lead\">This is a simple hero unit, a simple jumbotron-style component for calling extra attention to featured content or information.</p>");
-        out.println("        <hr class=\"my-4\">");
-        out.println("        <p>It uses utility classes for typography and spacing to space content out within the larger container.</p>");
-        out.println("    </div>");
+    private void vypis_kosik(PrintWriter out) {
         out.println("    <table class=\"table table-striped\">");
-        out.println("        <thead>");
-        out.println("            <tr>");
-        out.println("                <th scope=\"col\"></th>");
-        out.println("                <th scope=\"col\">Názov</th>");
-        out.println("                <th scope=\"col\">Mierka</th>");
-        out.println("                <th scope=\"col\">Výrobca</th>");
-        out.println("                <th scope=\"col\">Počet ks</th>");
-        out.println("                <th scope=\"col\">Cena</th>");
-        out.println("                <th scope=\"col\"></th>");
-        out.println("            </tr>");
-        out.println("        </thead>");
         out.println("        <tbody>");
+        int celkovaCenaBezZlavy = 0;
         try {
-            stmt = con.createStatement();
-            rs = stmt.executeQuery("SELECT * FROM sklad");
+            pstmt = con.prepareStatement("SELECT * FROM kosik INNER JOIN sklad ON sklad.ID = ID_tovaru WHERE ID_pouzivatela = ?");
+            pstmt.setInt(1, user_id);
+            rs = pstmt.executeQuery();
+            
             while (rs.next()) {
                 out.println("                <tr>");
-                out.println("                    <td><img src=\"" + getServletContext().getContextPath() + "\\static\\obrazky\\" + rs.getInt("ID") + ".jpg\" height=\"73\"</td>");
+                out.println("                    <td><img src=\"" + getServletContext().getContextPath() + "\\static\\obrazky\\" + rs.getInt("ID_tovaru") + ".jpg\" height=\"73\"</td>");
                 out.println("                    <td>" + rs.getString("nazov") + "</td>");
-                out.println("                    <td>1:" + rs.getInt("mierka") + "</td>");
-                out.println("                    <td>" + rs.getString("vyrobca") + "</td>");
                 out.println("                    <td>" + rs.getInt("ks") + "</td>");
                 out.println("                    <td>" + rs.getInt("cena") + "€</td>");
-                out.println("    <td><form action=\"index\" method=\"post\">");
-                out.println("        <input type=\"number\" name=\"pocet\" class=\"form-control\" min=\"1\" value=\"1\">");
+                out.println("    <td><form action=\"kosik\" method=\"post\">");
                 out.println("        <input type=\"hidden\" name=\"cena_tovaru\" value=\"" + rs.getInt("cena") + "\">");
-                out.println("        <input type=\"hidden\" name=\"id_tovaru\" value=\"" + rs.getInt("ID") + "\">");
-                out.println("        <button class=\"btn btn-primary m-1\" name=\"pridat\" type=\"submit\">Do košíka</button>");
+                out.println("        <input type=\"hidden\" name=\"id_tovaru\" value=\"" + rs.getInt("ID_tovaru") + "\">");
+                out.println("        <button class=\"btn btn-danger m-1\" name=\"odobrat\" type=\"submit\">x</button>");
                 out.println("    </form></td>");
                 out.println("                </tr>");
+                celkovaCenaBezZlavy += (rs.getInt("cena")*rs.getInt("ks"));
             }
-            stmt.close();
+            pstmt.close();
         } catch (SQLException ex) {
             ex.printStackTrace();
         }
-
+        int celkovaCenaSoZlavou = (int) (celkovaCenaBezZlavy * ((100-Integer.parseInt(session.getAttribute("zlava").toString()))/100.0));
         out.println("        </tbody>");
         out.println("    </table>");
+        out.println("    <h4>Cena so zľavou: " + celkovaCenaSoZlavou + "€</h4>");
+        out.println("    <h6>Cena bez zľavy: " + celkovaCenaBezZlavy + "€</h6>");
+        out.println("    <h6>Zľava: " + session.getAttribute("zlava") + "<span class=\"glyphicon glyphicon-remove\" aria-hidden=\"true\"></span>%</h6>");
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
@@ -185,37 +187,5 @@ public class Index extends HttpServlet {
     public String getServletInfo() {
         return "Short description";
     }// </editor-fold>
-
-    private void ZapisDoKosika(Integer user_id, String id_tovaru, String cena_tovaru, String pocet_ks) {
-        try {
-            pstmt = con.prepareStatement("SELECT COUNT(ID) AS pocet FROM kosik WHERE (ID_pouzivatela = ?) AND (ID_tovaru = ?)");
-            pstmt.setInt(1, user_id);
-            pstmt.setString(2, id_tovaru);
-            rs = pstmt.executeQuery();
-            
-            rs.next();
-            int pocet = rs.getInt("pocet");
-            if (pocet == 0) {
-                pstmt = con.prepareStatement("INSERT INTO kosik (ID_pouzivatela, ID_tovaru, cena, ks) VALUES (?, ?, ?, ?)");
-                pstmt.setInt(1, user_id);
-                pstmt.setString(2, id_tovaru);
-                pstmt.setString(3, cena_tovaru);
-                pstmt.setString(4, pocet_ks);
-                
-                pstmt.executeUpdate();
-            } else {
-                pstmt = con.prepareStatement("UPDATE kosik SET ks = ? + 1 where (ID_pouzivatela = ?) AND (ID_tovaru = ?)");
-                pstmt.setString(1, pocet_ks);
-                pstmt.setInt(2, user_id);
-                pstmt.setString(3, id_tovaru);
-                
-                pstmt.executeUpdate();
-            }
-            
-            pstmt.close();
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        }
-    }
 
 }
