@@ -127,7 +127,7 @@ public class Login extends HttpServlet {
     private void ZapamatajUdajeOUserovi(int id) {
         try {
             // dopisat dalsie udaje do session?
-            pstmt = con.prepareStatement("SELECT login, prava FROM pouzivatelia WHERE ID = ?");
+            pstmt = con.prepareStatement("SELECT login, prava, zlava FROM pouzivatelia WHERE ID = ?");
             pstmt.setString(1, String.valueOf(id));
             rs = pstmt.executeQuery();
             
@@ -137,7 +137,7 @@ public class Login extends HttpServlet {
             session.setAttribute("user_id", (Integer) id);
             session.setAttribute("username", rs.getString("login"));
             session.setAttribute("prava", rs.getString("prava"));
-            session.setAttribute("zlava", rs.getString("zlava"));
+            session.setAttribute("zlava", rs.getInt("zlava"));
             session.setMaxInactiveInterval(600);
             pstmt.close();
         } catch (SQLException ex) {

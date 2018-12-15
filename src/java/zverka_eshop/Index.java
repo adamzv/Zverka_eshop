@@ -99,7 +99,7 @@ public class Index extends HttpServlet {
         }
     }
 
-    public void vypis_index(PrintWriter out, String username) {
+    private void vypis_index(PrintWriter out, String username) {
         out.println("    <div class=\"jumbotron\">");
         out.println("        <h1 class=\"display-4\">Lorem Ipsum " + username + "</h1>");
         out.println("        <p class=\"lead\">This is a simple hero unit, a simple jumbotron-style component for calling extra attention to featured content or information.</p>");
@@ -145,7 +145,6 @@ public class Index extends HttpServlet {
 
         out.println("        </tbody>");
         out.println("    </table>");
-
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">

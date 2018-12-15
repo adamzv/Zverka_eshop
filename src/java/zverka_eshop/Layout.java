@@ -51,15 +51,15 @@ public class Layout {
             out.println("                       aria-expanded=\"false\" id=\"dropdown\">" + session.getAttribute("username") + "<span class=\"caret\"></span></a>");
             out.println("                    <div class=\"dropdown-menu dropdown-menu-right\" aria-labelledby=\"dropdown\">");
             out.println("                        <a class=\"dropdown-item nav-link disabled\" href=\"#\">Nastavenia</a>");
-            out.println("                        <a class=\"dropdown-item nav-link\" href=\"/objednavky\">Objednávky</a>");
+            out.println("                        <a class=\"dropdown-item nav-link\" href=\"objednavky\">Objednávky</a>");
             if (session.getAttribute("prava").equals("admin")) {
-                out.println("                        <a class=\"dropdown-item nav-link\" href=\"/admin\">Admin</a>");
+                out.println("                        <a class=\"dropdown-item nav-link\" href=\"admin\">Admin</a>");
             }
-            out.println("                        <a class=\"dropdown-item nav-link\" href=\"/logout\">Odhlásiť sa</a>");
+            out.println("                        <a class=\"dropdown-item nav-link\" href=\"logout\">Odhlásiť sa</a>");
             out.println("                    </div>");
             out.println("                </li>");
         } else {
-            out.println("                <li class=\"nav-item\"><a class=\"nav-link\" href=\"/login\">Prihlásiť sa</a></li>");
+            out.println("                <li class=\"nav-item\"><a class=\"nav-link\" href=\"login\">Prihlásiť sa</a></li>");
         }
         out.println("            </ul>");
         out.println("    </div>");

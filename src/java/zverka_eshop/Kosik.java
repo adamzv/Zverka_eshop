@@ -8,8 +8,10 @@ package zverka_eshop;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -37,6 +39,26 @@ public class Kosik extends HttpServlet {
     HttpSession session;
     Integer user_id = 0;
     String username = null;
+
+    @Override
+    public void init() {
+        try {
+            super.init();
+            Class.forName(driver);
+            con = DriverManager.getConnection(URL, db_username, db_password);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    @Override
+    public void destroy() {
+        super.destroy();
+        try {
+            con.close();
+        } catch (SQLException ex) {
+        }
+    }
     
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
@@ -49,9 +71,9 @@ public class Kosik extends HttpServlet {
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        
+
         session = request.getSession();
-        
+
         // skontroluje, či je používateľ prihlásený, ak nie je tak ho pošle na login servlet
         Integer user = (Integer) session.getAttribute("user_id");
         if (user == null) {
@@ -60,16 +82,62 @@ public class Kosik extends HttpServlet {
             user_id = user;
             username = (String) session.getAttribute("username");
         }
-        
         response.setContentType("text/html;charset=UTF-8");
+
         try (PrintWriter out = response.getWriter()) {
-            /* TODO output your page here. You may use following sample code. */
             Layout.vypis_html(Layout.ZACIATOK_HTML, out, "Košík");
             Layout.vypis_navbar(out, session);
-            out.println("<h1>Servlet Kosik at " + request.getContextPath() + "</h1>");
+            vypis_kosik(out);
             Layout.vypis_footer(out);
             Layout.vypis_html(Layout.KONIEC_HTML, out);
         }
+    }
+
+    private void vypis_kosik(PrintWriter out) {
+        out.println("    <table class=\"table table-striped\">");
+        /*out.println("        <thead>");
+        out.println("            <tr>");
+        out.println("                <th scope=\"col\"></th>");
+        out.println("                <th scope=\"col\">Názov</th>");
+        out.println("                <th scope=\"col\">Mierka</th>");
+        out.println("                <th scope=\"col\">Výrobca</th>");
+        out.println("                <th scope=\"col\">Počet ks</th>");
+        out.println("                <th scope=\"col\">Cena</th>");
+        out.println("                <th scope=\"col\"></th>");
+        out.println("            </tr>");
+        out.println("        </thead>");*/
+        out.println("        <tbody>");
+        int celkovaCenaBezZlavy = 0;
+        try {
+            pstmt = con.prepareStatement("SELECT * FROM kosik INNER JOIN sklad ON sklad.ID = ID_tovaru WHERE ID_pouzivatela = ?");
+            pstmt.setInt(1, user_id);
+            rs = pstmt.executeQuery();
+            
+            while (rs.next()) {
+                out.println("                <tr>");
+                out.println("                    <td><img src=\"" + getServletContext().getContextPath() + "\\static\\obrazky\\" + rs.getInt("ID_tovaru") + ".jpg\" height=\"73\"</td>");
+                out.println("                    <td>" + rs.getString("nazov") + "</td>");
+                out.println("                    <td>" + rs.getInt("ks") + "</td>");
+                out.println("                    <td>" + rs.getInt("cena") + "€</td>");
+                /*out.println("    <td><form action=\"index\" method=\"post\">");
+                out.println("        <input type=\"number\" name=\"pocet\" class=\"form-control\" min=\"1\" value=\"1\">");
+                out.println("        <input type=\"hidden\" name=\"cena_tovaru\" value=\"" + rs.getInt("cena") + "\">");
+                out.println("        <input type=\"hidden\" name=\"id_tovaru\" value=\"" + rs.getInt("ID") + "\">");
+                out.println("        <button class=\"btn btn-primary m-1\" name=\"pridat\" type=\"submit\">Do košíka</button>");
+                out.println("    </form></td>");*/
+                out.println("                </tr>");
+                celkovaCenaBezZlavy += (rs.getInt("cena")*rs.getInt("ks"));
+            }
+            pstmt.close();
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+        int celkovaCenaSoZlavou = (int) (celkovaCenaBezZlavy * ((100-Integer.parseInt(session.getAttribute("zlava").toString()))/100.0));
+        out.println("        </tbody>");
+        out.println("    </table>");
+        out.println("    <h4>Cena so zľavou: " + celkovaCenaSoZlavou + "€</h4>");
+        out.println("    <h6>Cena bez zľavy: " + celkovaCenaBezZlavy + "€</h6>");
+        out.println("    <h6>Zľava: " + session.getAttribute("zlava") + "%</h6>");
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
