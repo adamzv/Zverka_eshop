@@ -13,8 +13,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -88,6 +86,8 @@ public class Index extends HttpServlet {
 
         if (request.getMethod().equals("POST")) {
             ZapisDoKosika(user_id, request.getParameter("id_tovaru"), request.getParameter("cena_tovaru"), request.getParameter("pocet"));
+            // spraví redirect, aby používateľ refreshnutím stránky nepridal ďalší tovar do košíka
+            response.sendRedirect("index");
         }
         
         try (PrintWriter out = response.getWriter()) {

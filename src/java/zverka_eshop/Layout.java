@@ -29,7 +29,7 @@ public class Layout {
 
     public static void vypis_navbar(PrintWriter out, HttpSession session) {
         out.println("<nav class=\"navbar navbar-expand-md navbar-light bg-light border\">");
-        out.println("    <a class=\"navbar-brand\" href=\"/\">jShop Zverka</a>");
+        out.println("    <a class=\"navbar-brand\" href=\"index\">jShop Zverka</a>");
         out.println("    <button aria-controls=\"navbar\" aria-expanded=\"false\" aria-label=\"Toggle navigation\" class=\"navbar-toggler\"");
         out.println("            data-target=\"#navbar\" data-toggle=\"collapse\" type=\"button\">");
         out.println("        <span class=\"navbar-toggler-icon\"></span>");
@@ -37,9 +37,9 @@ public class Layout {
         out.println("    <div class=\"collapse navbar-collapse\" id=\"navbar\">");
         if (session.getAttribute("user_id") != null) {
             out.println("            <ul class=\"navbar-nav mr-auto mt-2\">");
-            out.println("                <li class=\"nav-item\"><a class=\"nav-link\" href=\"/index\">Ponuka</a></li>");
-            out.println("                <li class=\"nav-item\"><a class=\"nav-link\" href=\"/kosik\">Košík</a></li>");
-            out.println("                <li class=\"nav-item\"><a class=\"nav-link\" href=\"/objednavky\">Objednávky</a></li>");
+            out.println("                <li class=\"nav-item\"><a class=\"nav-link\" href=\"index\">Ponuka</a></li>");
+            out.println("                <li class=\"nav-item\"><a class=\"nav-link\" href=\"kosik\">Košík</a></li>");
+            out.println("                <li class=\"nav-item\"><a class=\"nav-link\" href=\"objednavky\">Objednávky</a></li>");
             out.println("            </ul>");
         }
         out.println();
