@@ -13,6 +13,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -82,6 +84,25 @@ public class Kosik extends HttpServlet {
             user_id = user;
             username = (String) session.getAttribute("username");
         }
+        
+        // ak sem prišiel používate2 cez formulár, tak vymaž danú položku z košíka
+        if (request.getMethod().equals("POST")) {
+            try {
+                pstmt = con.prepareStatement("DELETE FROM kosik WHERE (ID_pouzivatela = ?) AND (ID_tovaru = ?)");
+                pstmt.setInt(1, user_id);
+                System.out.println(request.getParameter("id_tovaru"));
+                pstmt.setString(2, request.getParameter("id_tovaru"));
+                pstmt.executeUpdate();
+                
+                pstmt.close();
+                System.out.println("OK");
+                response.sendRedirect("kosik");
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+            
+        }
+        
         response.setContentType("text/html;charset=UTF-8");
 
         try (PrintWriter out = response.getWriter()) {
@@ -95,17 +116,6 @@ public class Kosik extends HttpServlet {
 
     private void vypis_kosik(PrintWriter out) {
         out.println("    <table class=\"table table-striped\">");
-        /*out.println("        <thead>");
-        out.println("            <tr>");
-        out.println("                <th scope=\"col\"></th>");
-        out.println("                <th scope=\"col\">Názov</th>");
-        out.println("                <th scope=\"col\">Mierka</th>");
-        out.println("                <th scope=\"col\">Výrobca</th>");
-        out.println("                <th scope=\"col\">Počet ks</th>");
-        out.println("                <th scope=\"col\">Cena</th>");
-        out.println("                <th scope=\"col\"></th>");
-        out.println("            </tr>");
-        out.println("        </thead>");*/
         out.println("        <tbody>");
         int celkovaCenaBezZlavy = 0;
         try {
@@ -119,12 +129,11 @@ public class Kosik extends HttpServlet {
                 out.println("                    <td>" + rs.getString("nazov") + "</td>");
                 out.println("                    <td>" + rs.getInt("ks") + "</td>");
                 out.println("                    <td>" + rs.getInt("cena") + "€</td>");
-                /*out.println("    <td><form action=\"index\" method=\"post\">");
-                out.println("        <input type=\"number\" name=\"pocet\" class=\"form-control\" min=\"1\" value=\"1\">");
+                out.println("    <td><form action=\"kosik\" method=\"post\">");
                 out.println("        <input type=\"hidden\" name=\"cena_tovaru\" value=\"" + rs.getInt("cena") + "\">");
-                out.println("        <input type=\"hidden\" name=\"id_tovaru\" value=\"" + rs.getInt("ID") + "\">");
-                out.println("        <button class=\"btn btn-primary m-1\" name=\"pridat\" type=\"submit\">Do košíka</button>");
-                out.println("    </form></td>");*/
+                out.println("        <input type=\"hidden\" name=\"id_tovaru\" value=\"" + rs.getInt("ID_tovaru") + "\">");
+                out.println("        <button class=\"btn btn-danger m-1\" name=\"odobrat\" type=\"submit\">x</button>");
+                out.println("    </form></td>");
                 out.println("                </tr>");
                 celkovaCenaBezZlavy += (rs.getInt("cena")*rs.getInt("ks"));
             }
@@ -137,7 +146,7 @@ public class Kosik extends HttpServlet {
         out.println("    </table>");
         out.println("    <h4>Cena so zľavou: " + celkovaCenaSoZlavou + "€</h4>");
         out.println("    <h6>Cena bez zľavy: " + celkovaCenaBezZlavy + "€</h6>");
-        out.println("    <h6>Zľava: " + session.getAttribute("zlava") + "%</h6>");
+        out.println("    <h6>Zľava: " + session.getAttribute("zlava") + "<span class=\"glyphicon glyphicon-remove\" aria-hidden=\"true\"></span>%</h6>");
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
