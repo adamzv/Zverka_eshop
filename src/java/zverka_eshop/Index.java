@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -31,6 +32,7 @@ public class Index extends HttpServlet {
     String driver = "com.mysql.jdbc.Driver";
     Connection con = null;
     Statement stmt = null;
+    PreparedStatement pstmt = null;
     ResultSet rs = null;
     String db_username = "root";
     String db_password = "";
@@ -84,7 +86,10 @@ public class Index extends HttpServlet {
             username = (String) session.getAttribute("username");
         }
 
-        String path = request.getPathInfo();
+        if (request.getMethod().equals("POST")) {
+            ZapisDoKosika(user_id, request.getParameter("id_tovaru"), request.getParameter("cena_tovaru"), request.getParameter("pocet"));
+        }
+        
         try (PrintWriter out = response.getWriter()) {
             Layout.vypis_html(Layout.ZACIATOK_HTML, out, "Index");
             Layout.vypis_navbar(out, session);
@@ -125,15 +130,17 @@ public class Index extends HttpServlet {
                 out.println("                    <td>" + rs.getString("vyrobca") + "</td>");
                 out.println("                    <td>" + rs.getInt("ks") + "</td>");
                 out.println("                    <td>" + rs.getInt("cena") + "€</td>");
-                out.println("    <td><form action=\"/TODO\">");
+                out.println("    <td><form action=\"index\" method=\"post\">");
                 out.println("        <input type=\"number\" name=\"pocet\" class=\"form-control\" min=\"1\" value=\"1\">");
-                out.println("        <input type=\"hidden\" name=\"id_tovaru\" value=\"?\">");
-                out.println("        <button class=\"btn btn-primary m-1\" type=\"submit\">Do košíka</button>");
+                out.println("        <input type=\"hidden\" name=\"cena_tovaru\" value=\"" + rs.getInt("cena") + "\">");
+                out.println("        <input type=\"hidden\" name=\"id_tovaru\" value=\"" + rs.getInt("ID") + "\">");
+                out.println("        <button class=\"btn btn-primary m-1\" name=\"pridat\" type=\"submit\">Do košíka</button>");
                 out.println("    </form></td>");
                 out.println("                </tr>");
             }
+            stmt.close();
         } catch (SQLException ex) {
-            Logger.getLogger(Index.class.getName()).log(Level.SEVERE, null, ex);
+            ex.printStackTrace();
         }
 
         out.println("        </tbody>");
@@ -179,5 +186,29 @@ public class Index extends HttpServlet {
     public String getServletInfo() {
         return "Short description";
     }// </editor-fold>
+
+    private void ZapisDoKosika(Integer user_id, String id_tovaru, String cena_tovaru, String pocet_ks) {
+        try {
+            pstmt = con.prepareStatement("SELECT COUNT(ID) AS pocet FROM kosik WHERE (ID_pouzivatela = ?) AND (ID_tovaru = ?)");
+            pstmt.setInt(1, user_id);
+            pstmt.setString(2, id_tovaru);
+            rs = pstmt.executeQuery();
+            
+            rs.next();
+            int pocet = rs.getInt("pocet");
+            if (pocet == 0) {
+                pstmt = con.prepareStatement("INSERT INTO kosik (ID_pouzivatela, ID_tovaru, cena, ks) VALUES (?, ?, ?, ?)");
+                pstmt.setInt(1, user_id);
+                pstmt.setString(2, id_tovaru);
+                pstmt.setString(3, cena_tovaru);
+                pstmt.setString(4, pocet_ks);
+                pstmt.executeUpdate();
+            }
+            
+            pstmt.close();
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+    }
 
 }
