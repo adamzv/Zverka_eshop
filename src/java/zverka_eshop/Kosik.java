@@ -117,6 +117,7 @@ public class Kosik extends HttpServlet {
         out.println("    <table class=\"table table-striped\">");
         out.println("        <tbody>");
         int celkovaCenaBezZlavy = 0;
+        int pocet_poloziek = 0;
         try {
             pstmt = con.prepareStatement("SELECT * FROM kosik INNER JOIN sklad ON sklad.ID = ID_tovaru WHERE ID_pouzivatela = ?");
             pstmt.setInt(1, user_id);
@@ -135,6 +136,7 @@ public class Kosik extends HttpServlet {
                 out.println("    </form></td>");
                 out.println("                </tr>");
                 celkovaCenaBezZlavy += (rs.getInt("cena") * rs.getInt("ks"));
+                pocet_poloziek += 1;
             }
             pstmt.close();
         } catch (SQLException ex) {
@@ -148,7 +150,11 @@ public class Kosik extends HttpServlet {
         out.println("    <h6>Zľava: " + session.getAttribute("zlava") + "<span class=\"glyphicon glyphicon-remove\" aria-hidden=\"true\"></span>%</h6>");
         out.println("    <form action=\"objednavky\" method=\"post\">");
         out.println("        <input type=\"hidden\" name=\"cena_tovaru\" value=\"" + celkovaCenaSoZlavou + "\">");
-        out.println("        <button class=\"btn btn-success m-1\" name=\"odobrat\" type=\"submit\">Objednať</button>");
+        if (pocet_poloziek > 0) {
+            out.println("        <button class=\"btn btn-success m-1\" name=\"objednat\" type=\"submit\">Objednať</button>");
+        } else {
+            out.println("        <button class=\"btn btn-secondary m-1\" name=\"objednat\" type=\"submit\" disabled>Objednať</button>");
+        }
         out.println("    </form>");
     }
 
