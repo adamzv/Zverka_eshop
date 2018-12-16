@@ -76,9 +76,7 @@ public class Login extends HttpServlet {
         if (request.getMethod().equals("POST")) {
             String username = request.getParameter("username");
             String heslo = request.getParameter("heslo");
-            System.out.println("user_id "+ user_id );
             if (user_id == 0) {
-                System.out.println("Som tu?");
                 user_id = OverUsera(username, heslo);
                 if (user_id == 0) {
                     response.sendRedirect("/eshop/login");
@@ -132,7 +130,6 @@ public class Login extends HttpServlet {
             rs = pstmt.executeQuery();
             
             rs.next();
-            System.out.println("Zap user_id: " + id);
             
             session.setAttribute("user_id", (Integer) id);
             session.setAttribute("username", rs.getString("login"));

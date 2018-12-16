@@ -13,6 +13,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -36,6 +39,7 @@ public class Objednavky extends HttpServlet {
     String db_password = "";
     String URL = "jdbc:mysql://localhost/zverka_eshop";
 
+    SimpleDateFormat dateFormat;
     HttpSession session;
     Integer user_id = 0;
     String username = null;
@@ -84,19 +88,59 @@ public class Objednavky extends HttpServlet {
             zlava = Integer.parseInt(session.getAttribute("zlava").toString());
         }
 
+        
+        
         // ak sem prišiel používateľ cez formulár, tak som si objednal tovar z košíka
         if (request.getMethod().equals("POST")) {
+            dateFormat = new SimpleDateFormat("yyyyMMddHHmmssSSS");
+            // číslo objednávky
+            String obj_cislo = dateFormat.format(new Date());
             try {
-                pstmt = con.prepareStatement("DELETE FROM kosik WHERE (ID_pouzivatela = ?) AND (ID_tovaru = ?)");
-                pstmt.setInt(1, user_id);
-                System.out.println(request.getParameter("id_tovaru"));
-                pstmt.setString(2, request.getParameter("id_tovaru"));
+                int cena_tovaru = Integer.parseInt(request.getParameter("cena_tovaru"));
+                // vloženie informácii o objednávke do obj_zoznam
+                pstmt = con.prepareStatement("INSERT INTO obj_zoznam (obj_cislo, datum_objednavky, ID_pouzivatela, suma, stav) VALUES (?, ?, ?, ?, ?)");
+                pstmt.setString(1, obj_cislo);
+                pstmt.setDate(2, new java.sql.Date(dateFormat.parse(obj_cislo).getTime()));
+                pstmt.setInt(3, user_id);
+                pstmt.setInt(4, cena_tovaru);
+                pstmt.setString(5, "objednane");
                 pstmt.executeUpdate();
-
+                
+                // získanie tovaru z košíka
+                pstmt = con.prepareStatement("SELECT * FROM kosik WHERE ID_pouzivatela = ?");
+                pstmt.setInt(1, user_id);
+                rs = pstmt.executeQuery();
+                
+                // získanie id objednávky
+                pstmt = con.prepareStatement("SELECT ID from obj_zoznam WHERE obj_cislo = ?");
+                pstmt.setString(1, obj_cislo);
+                ResultSet rs_cislo = pstmt.executeQuery();
+                rs_cislo.next();
+                int obj_id = rs_cislo.getInt("ID");
+                
+                // zápis tovaru do obj_polozky
+                while (rs.next()) {
+                    int id_tovaru = rs.getInt("ID_tovaru");
+                    int cena = rs.getInt("cena");
+                    int ks = rs.getInt("ks");
+                    pstmt = con.prepareStatement("INSERT INTO obj_polozky (ID_objednavky, ID_tovaru, cena, ks) VALUES (?, ?, ?, ?)");
+                    pstmt.setInt(1, obj_id);
+                    pstmt.setInt(2, id_tovaru);
+                    pstmt.setInt(3, cena);
+                    pstmt.setInt(4, ks);
+                    pstmt.executeUpdate();
+                }
+                
+                // vymazanie košíka
+                pstmt = con.prepareStatement("DELETE FROM kosik WHERE ID_pouzivatela = ?");
+                pstmt.setInt(1, user_id);
+                pstmt.executeUpdate();
+                
                 pstmt.close();
-                System.out.println("OK");
-                response.sendRedirect("kosik");
+                response.sendRedirect("objednavky");
             } catch (SQLException ex) {
+                ex.printStackTrace();
+            } catch (ParseException ex) {
                 ex.printStackTrace();
             }
 
@@ -107,7 +151,7 @@ public class Objednavky extends HttpServlet {
         try (PrintWriter out = response.getWriter()) {
             Layout.vypis_html(Layout.ZACIATOK_HTML, out, "Objednávky");
             Layout.vypis_navbar(out, session);
-            vypis_objednavky(out);
+            //vypis_objednavky(out);
             Layout.vypis_footer(out);
             Layout.vypis_html(Layout.KONIEC_HTML, out);
         }
