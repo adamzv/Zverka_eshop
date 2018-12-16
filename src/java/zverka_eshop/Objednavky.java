@@ -88,56 +88,79 @@ public class Objednavky extends HttpServlet {
             zlava = Integer.parseInt(session.getAttribute("zlava").toString());
         }
 
-        
-        
         // ak sem prišiel používateľ cez formulár, tak som si objednal tovar z košíka
         if (request.getMethod().equals("POST")) {
             dateFormat = new SimpleDateFormat("yyyyMMddHHmmssSSS");
             // číslo objednávky
             String obj_cislo = dateFormat.format(new Date());
             try {
-                int cena_tovaru = Integer.parseInt(request.getParameter("cena_tovaru"));
-                // vloženie informácii o objednávke do obj_zoznam
-                pstmt = con.prepareStatement("INSERT INTO obj_zoznam (obj_cislo, datum_objednavky, ID_pouzivatela, suma, stav) VALUES (?, ?, ?, ?, ?)");
-                pstmt.setString(1, obj_cislo);
-                pstmt.setDate(2, new java.sql.Date(dateFormat.parse(obj_cislo).getTime()));
-                pstmt.setInt(3, user_id);
-                pstmt.setInt(4, cena_tovaru);
-                pstmt.setString(5, "objednane");
-                pstmt.executeUpdate();
-                
-                // získanie tovaru z košíka
-                pstmt = con.prepareStatement("SELECT * FROM kosik WHERE ID_pouzivatela = ?");
-                pstmt.setInt(1, user_id);
-                rs = pstmt.executeQuery();
-                
-                // získanie id objednávky
-                pstmt = con.prepareStatement("SELECT ID from obj_zoznam WHERE obj_cislo = ?");
-                pstmt.setString(1, obj_cislo);
-                ResultSet rs_cislo = pstmt.executeQuery();
-                rs_cislo.next();
-                int obj_id = rs_cislo.getInt("ID");
-                
-                // zápis tovaru do obj_polozky
-                while (rs.next()) {
-                    int id_tovaru = rs.getInt("ID_tovaru");
-                    int cena = rs.getInt("cena");
-                    int ks = rs.getInt("ks");
-                    pstmt = con.prepareStatement("INSERT INTO obj_polozky (ID_objednavky, ID_tovaru, cena, ks) VALUES (?, ?, ?, ?)");
-                    pstmt.setInt(1, obj_id);
-                    pstmt.setInt(2, id_tovaru);
-                    pstmt.setInt(3, cena);
-                    pstmt.setInt(4, ks);
-                    pstmt.executeUpdate();
+                synchronized (this) {
+                    // získanie tovaru z košíka
+                    pstmt = con.prepareStatement("SELECT ID_pouzivatela, ID_tovaru, kosik.cena, kosik.ks, sklad.ks AS sklad_ks FROM kosik INNER JOIN sklad ON kosik.ID_tovaru = sklad.ID WHERE ID_pouzivatela = ?");
+                    pstmt.setInt(1, user_id);
+                    rs = pstmt.executeQuery();
+
+                    boolean dostatok_tovaru = true;
+
+                    // skontrolovanie stavu v sklade
+                    while (rs.next()) {
+                        int kosik_ks = rs.getInt("ks");
+                        int sklad_ks = rs.getInt("sklad_ks");
+                        if (kosik_ks > sklad_ks) {
+                            dostatok_tovaru = false;
+                            break;
+                        }
+                    }
+                    
+                    // ak nie je dostatok tovaru na sklade, nedokonči objednávku
+                    if (dostatok_tovaru) {
+                        int cena_tovaru = Integer.parseInt(request.getParameter("cena_tovaru"));
+                        // vloženie informácii o objednávke do obj_zoznam
+                        pstmt = con.prepareStatement("INSERT INTO obj_zoznam (obj_cislo, datum_objednavky, ID_pouzivatela, suma, stav) VALUES (?, ?, ?, ?, ?)");
+                        pstmt.setString(1, obj_cislo);
+                        pstmt.setDate(2, new java.sql.Date(dateFormat.parse(obj_cislo).getTime()));
+                        pstmt.setInt(3, user_id);
+                        pstmt.setInt(4, cena_tovaru);
+                        pstmt.setString(5, "objednane");
+                        pstmt.executeUpdate();
+
+                        // získanie id objednávky
+                        pstmt = con.prepareStatement("SELECT ID from obj_zoznam WHERE obj_cislo = ?");
+                        pstmt.setString(1, obj_cislo);
+                        ResultSet rs_cislo = pstmt.executeQuery();
+                        rs_cislo.next();
+                        int obj_id = rs_cislo.getInt("ID");
+
+                        // zápis tovaru do obj_polozky
+                        rs.beforeFirst();
+                        while (rs.next()) {
+                            int id_tovaru = rs.getInt("ID_tovaru");
+                            int cena = rs.getInt("cena");
+                            int ks = rs.getInt("ks");
+                            int sklad_ks = rs.getInt("sklad_ks");
+                            pstmt = con.prepareStatement("INSERT INTO obj_polozky (ID_objednavky, ID_tovaru, cena, ks) VALUES (?, ?, ?, ?)");
+                            pstmt.setInt(1, obj_id);
+                            pstmt.setInt(2, id_tovaru);
+                            pstmt.setInt(3, cena);
+                            pstmt.setInt(4, ks);
+                            pstmt.executeUpdate();
+                            
+                            pstmt = con.prepareStatement("UPDATE sklad SET ks = ? WHERE ID = ?");
+                            pstmt.setInt(1, sklad_ks - ks);
+                            pstmt.setInt(2, id_tovaru);
+                            pstmt.executeUpdate();
+                        }
+
+                        // vymazanie košíka
+                        pstmt = con.prepareStatement("DELETE FROM kosik WHERE ID_pouzivatela = ?");
+                        pstmt.setInt(1, user_id);
+                        pstmt.executeUpdate();
+                    }
+                    
+                    pstmt.close();
+                    response.sendRedirect("objednavky");
                 }
                 
-                // vymazanie košíka
-                pstmt = con.prepareStatement("DELETE FROM kosik WHERE ID_pouzivatela = ?");
-                pstmt.setInt(1, user_id);
-                pstmt.executeUpdate();
-                
-                pstmt.close();
-                response.sendRedirect("objednavky");
             } catch (SQLException ex) {
                 ex.printStackTrace();
             } catch (ParseException ex) {
