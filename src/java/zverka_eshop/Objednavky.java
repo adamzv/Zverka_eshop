@@ -24,8 +24,8 @@ import javax.servlet.http.HttpSession;
  *
  * @author adamz
  */
-@WebServlet(name = "Kosik", urlPatterns = {"/kosik"})
-public class Kosik extends HttpServlet {
+@WebServlet(name = "Objednavky", urlPatterns = {"/objednavky"})
+public class Objednavky extends HttpServlet {
 
     String driver = "com.mysql.jdbc.Driver";
     Connection con = null;
@@ -60,7 +60,7 @@ public class Kosik extends HttpServlet {
         } catch (SQLException ex) {
         }
     }
-    
+
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
@@ -72,7 +72,6 @@ public class Kosik extends HttpServlet {
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-
         session = request.getSession();
 
         // skontroluje, či je používateľ prihlásený, ak nie je tak ho pošle na login servlet
@@ -84,8 +83,8 @@ public class Kosik extends HttpServlet {
             username = (String) session.getAttribute("username");
             zlava = Integer.parseInt(session.getAttribute("zlava").toString());
         }
-        
-        // ak sem prišiel používateľ cez formulár, tak vymaž danú položku z košíka
+
+        // ak sem prišiel používateľ cez formulár, tak som si objednal tovar z košíka
         if (request.getMethod().equals("POST")) {
             try {
                 pstmt = con.prepareStatement("DELETE FROM kosik WHERE (ID_pouzivatela = ?) AND (ID_tovaru = ?)");
@@ -93,60 +92,25 @@ public class Kosik extends HttpServlet {
                 System.out.println(request.getParameter("id_tovaru"));
                 pstmt.setString(2, request.getParameter("id_tovaru"));
                 pstmt.executeUpdate();
-                
+
                 pstmt.close();
                 System.out.println("OK");
                 response.sendRedirect("kosik");
             } catch (SQLException ex) {
                 ex.printStackTrace();
             }
-            
+
         }
-        
+
         response.setContentType("text/html;charset=UTF-8");
 
         try (PrintWriter out = response.getWriter()) {
-            Layout.vypis_html(Layout.ZACIATOK_HTML, out, "Košík");
+            Layout.vypis_html(Layout.ZACIATOK_HTML, out, "Objednávky");
             Layout.vypis_navbar(out, session);
-            vypis_kosik(out);
+            vypis_objednavky(out);
             Layout.vypis_footer(out);
             Layout.vypis_html(Layout.KONIEC_HTML, out);
         }
-    }
-
-    private void vypis_kosik(PrintWriter out) {
-        out.println("    <table class=\"table table-striped\">");
-        out.println("        <tbody>");
-        int celkovaCenaBezZlavy = 0;
-        try {
-            pstmt = con.prepareStatement("SELECT * FROM kosik INNER JOIN sklad ON sklad.ID = ID_tovaru WHERE ID_pouzivatela = ?");
-            pstmt.setInt(1, user_id);
-            rs = pstmt.executeQuery();
-            
-            while (rs.next()) {
-                out.println("                <tr>");
-                out.println("                    <td><img src=\"" + getServletContext().getContextPath() + "\\static\\obrazky\\" + rs.getInt("ID_tovaru") + ".jpg\" height=\"73\"</td>");
-                out.println("                    <td>" + rs.getString("nazov") + "</td>");
-                out.println("                    <td>" + rs.getInt("ks") + "</td>");
-                out.println("                    <td>" + rs.getInt("cena") + "€</td>");
-                out.println("    <td><form action=\"kosik\" method=\"post\">");
-                out.println("        <input type=\"hidden\" name=\"cena_tovaru\" value=\"" + rs.getInt("cena") + "\">");
-                out.println("        <input type=\"hidden\" name=\"id_tovaru\" value=\"" + rs.getInt("ID_tovaru") + "\">");
-                out.println("        <button class=\"btn btn-danger m-1\" name=\"odobrat\" type=\"submit\">x</button>");
-                out.println("    </form></td>");
-                out.println("                </tr>");
-                celkovaCenaBezZlavy += (rs.getInt("cena")*rs.getInt("ks"));
-            }
-            pstmt.close();
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        }
-        int celkovaCenaSoZlavou = (int) (celkovaCenaBezZlavy * ((100-zlava)/100.0));
-        out.println("        </tbody>");
-        out.println("    </table>");
-        out.println("    <h4>Cena so zľavou: " + celkovaCenaSoZlavou + "€</h4>");
-        out.println("    <h6>Cena bez zľavy: " + celkovaCenaBezZlavy + "€</h6>");
-        out.println("    <h6>Zľava: " + session.getAttribute("zlava") + "<span class=\"glyphicon glyphicon-remove\" aria-hidden=\"true\"></span>%</h6>");
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
@@ -187,5 +151,9 @@ public class Kosik extends HttpServlet {
     public String getServletInfo() {
         return "Short description";
     }// </editor-fold>
+
+    private void vypis_objednavky(PrintWriter out) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 
 }

@@ -77,7 +77,7 @@ public class Index extends HttpServlet {
 
         // skontroluje, či je používateľ prihlásený, ak nie je tak ho pošle na login servlet
         Integer user = (Integer) session.getAttribute("user_id");
-        if (user == null) {
+        if (user == null || user_id == null) {
             response.sendRedirect("/eshop/login");
         } else {
             user_id = user;
