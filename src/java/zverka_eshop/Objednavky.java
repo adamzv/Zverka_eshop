@@ -111,7 +111,7 @@ public class Objednavky extends HttpServlet {
                             break;
                         }
                     }
-                    
+
                     // ak nie je dostatok tovaru na sklade, nedokonči objednávku
                     if (dostatok_tovaru) {
                         int cena_tovaru = Integer.parseInt(request.getParameter("cena_tovaru"));
@@ -144,7 +144,7 @@ public class Objednavky extends HttpServlet {
                             pstmt.setInt(3, cena);
                             pstmt.setInt(4, ks);
                             pstmt.executeUpdate();
-                            
+
                             pstmt = con.prepareStatement("UPDATE sklad SET ks = ? WHERE ID = ?");
                             pstmt.setInt(1, sklad_ks - ks);
                             pstmt.setInt(2, id_tovaru);
@@ -156,11 +156,11 @@ public class Objednavky extends HttpServlet {
                         pstmt.setInt(1, user_id);
                         pstmt.executeUpdate();
                     }
-                    
+
                     pstmt.close();
                     response.sendRedirect("objednavky");
                 }
-                
+
             } catch (SQLException ex) {
                 ex.printStackTrace();
             } catch (ParseException ex) {
@@ -174,7 +174,7 @@ public class Objednavky extends HttpServlet {
         try (PrintWriter out = response.getWriter()) {
             Layout.vypis_html(Layout.ZACIATOK_HTML, out, "Objednávky");
             Layout.vypis_navbar(out, session);
-            //vypis_objednavky(out);
+            vypis_objednavky(out);
             Layout.vypis_footer(out);
             Layout.vypis_html(Layout.KONIEC_HTML, out);
         }
@@ -220,7 +220,48 @@ public class Objednavky extends HttpServlet {
     }// </editor-fold>
 
     private void vypis_objednavky(PrintWriter out) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        out.println("    <div class=\"jumbotron\">");
+        out.println("        <h1 class=\"display-4\">Lorem Ipsum " + username + " " + user_id + "</h1>");
+        out.println("        <p class=\"lead\">This is a simple hero unit, a simple jumbotron-style component for calling extra attention to featured content or information.</p>");
+        out.println("        <hr class=\"my-4\">");
+        out.println("        <p>It uses utility classes for typography and spacing to space content out within the larger container.</p>");
+        out.println("    </div>");
+        out.println("    <table class=\"table table-striped\">");
+        out.println("        <thead>");
+        out.println("            <tr>");
+        out.println("                <th scope=\"col\">Číslo objednávky</th>");
+        out.println("                <th scope=\"col\">Dátum objednávky</th>");
+        out.println("                <th scope=\"col\">Suma</th>");
+        out.println("                <th scope=\"col\">Stav</th>");
+        out.println("            </tr>");
+        out.println("        </thead>");
+        out.println("        <tbody>");
+        try {
+            stmt = con.createStatement();
+            rs = stmt.executeQuery("SELECT * FROM sklad");
+            while (rs.next()) {
+                out.println("                <tr>");
+                out.println("                    <td><img src=\"" + getServletContext().getContextPath() + "\\static\\obrazky\\" + rs.getInt("ID") + ".jpg\" height=\"73\"</td>");
+                out.println("                    <td>" + rs.getString("nazov") + "</td>");
+                out.println("                    <td>1:" + rs.getInt("mierka") + "</td>");
+                out.println("                    <td>" + rs.getString("vyrobca") + "</td>");
+                out.println("                    <td>" + rs.getInt("ks") + "</td>");
+                out.println("                    <td>" + rs.getInt("cena") + "€</td>");
+                out.println("    <td><form action=\"index\" method=\"post\">");
+                out.println("        <input type=\"number\" name=\"pocet\" class=\"form-control\" min=\"1\" value=\"1\">");
+                out.println("        <input type=\"hidden\" name=\"cena_tovaru\" value=\"" + rs.getInt("cena") + "\">");
+                out.println("        <input type=\"hidden\" name=\"id_tovaru\" value=\"" + rs.getInt("ID") + "\">");
+                out.println("        <button class=\"btn btn-primary m-1\" name=\"pridat\" type=\"submit\">Do košíka</button>");
+                out.println("    </form></td>");
+                out.println("                </tr>");
+            }
+            stmt.close();
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+
+        out.println("        </tbody>");
+        out.println("    </table>");
     }
 
 }
