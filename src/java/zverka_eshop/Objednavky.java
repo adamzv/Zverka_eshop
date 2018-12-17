@@ -155,18 +155,19 @@ public class Objednavky extends HttpServlet {
                         pstmt = con.prepareStatement("DELETE FROM kosik WHERE ID_pouzivatela = ?");
                         pstmt.setInt(1, user_id);
                         pstmt.executeUpdate();
+
+                        pstmt.close();
+                        response.sendRedirect("objednavky");
+                    } else {
+                        pstmt.close();
+                        response.sendRedirect("kosik");
                     }
-
-                    pstmt.close();
-                    response.sendRedirect("objednavky");
                 }
-
             } catch (SQLException ex) {
                 ex.printStackTrace();
             } catch (ParseException ex) {
                 ex.printStackTrace();
             }
-
         }
 
         response.setContentType("text/html;charset=UTF-8");
@@ -237,25 +238,18 @@ public class Objednavky extends HttpServlet {
         out.println("        </thead>");
         out.println("        <tbody>");
         try {
-            stmt = con.createStatement();
-            rs = stmt.executeQuery("SELECT * FROM sklad");
+            pstmt = con.prepareStatement("SELECT * FROM obj_zoznam WHERE ID_pouzivatela = ?");
+            pstmt.setInt(1, user_id);
+            rs = pstmt.executeQuery();
             while (rs.next()) {
                 out.println("                <tr>");
-                out.println("                    <td><img src=\"" + getServletContext().getContextPath() + "\\static\\obrazky\\" + rs.getInt("ID") + ".jpg\" height=\"73\"</td>");
-                out.println("                    <td>" + rs.getString("nazov") + "</td>");
-                out.println("                    <td>1:" + rs.getInt("mierka") + "</td>");
-                out.println("                    <td>" + rs.getString("vyrobca") + "</td>");
-                out.println("                    <td>" + rs.getInt("ks") + "</td>");
-                out.println("                    <td>" + rs.getInt("cena") + "€</td>");
-                out.println("    <td><form action=\"index\" method=\"post\">");
-                out.println("        <input type=\"number\" name=\"pocet\" class=\"form-control\" min=\"1\" value=\"1\">");
-                out.println("        <input type=\"hidden\" name=\"cena_tovaru\" value=\"" + rs.getInt("cena") + "\">");
-                out.println("        <input type=\"hidden\" name=\"id_tovaru\" value=\"" + rs.getInt("ID") + "\">");
-                out.println("        <button class=\"btn btn-primary m-1\" name=\"pridat\" type=\"submit\">Do košíka</button>");
-                out.println("    </form></td>");
+                out.println("                    <td>" + rs.getString("obj_cislo") + "</td>");
+                out.println("                    <td>" + rs.getDate("datum_objednavky") + "</td>");
+                out.println("                    <td>" + rs.getInt("suma") + "</td>");
+                out.println("                    <td>" + rs.getString("stav") + "</td>");
                 out.println("                </tr>");
             }
-            stmt.close();
+            pstmt.close();
         } catch (SQLException ex) {
             ex.printStackTrace();
         }
