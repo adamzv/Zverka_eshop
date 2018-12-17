@@ -13,8 +13,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -41,6 +39,7 @@ public class Kosik extends HttpServlet {
     HttpSession session;
     Integer user_id = 0;
     String username = null;
+    Integer zlava = 0;
 
     @Override
     public void init() {
@@ -61,7 +60,7 @@ public class Kosik extends HttpServlet {
         } catch (SQLException ex) {
         }
     }
-    
+
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
@@ -78,14 +77,15 @@ public class Kosik extends HttpServlet {
 
         // skontroluje, či je používateľ prihlásený, ak nie je tak ho pošle na login servlet
         Integer user = (Integer) session.getAttribute("user_id");
-        if (user == null) {
+        if (user == null || user_id == null) {
             response.sendRedirect("/eshop/login");
         } else {
             user_id = user;
             username = (String) session.getAttribute("username");
+            zlava = Integer.parseInt(session.getAttribute("zlava").toString());
         }
-        
-        // ak sem prišiel používate2 cez formulár, tak vymaž danú položku z košíka
+
+        // ak sem prišiel používateľ cez formulár, tak vymaž danú položku z košíka
         if (request.getMethod().equals("POST")) {
             try {
                 pstmt = con.prepareStatement("DELETE FROM kosik WHERE (ID_pouzivatela = ?) AND (ID_tovaru = ?)");
@@ -93,16 +93,15 @@ public class Kosik extends HttpServlet {
                 System.out.println(request.getParameter("id_tovaru"));
                 pstmt.setString(2, request.getParameter("id_tovaru"));
                 pstmt.executeUpdate();
-                
+
                 pstmt.close();
-                System.out.println("OK");
                 response.sendRedirect("kosik");
             } catch (SQLException ex) {
                 ex.printStackTrace();
             }
-            
+
         }
-        
+
         response.setContentType("text/html;charset=UTF-8");
 
         try (PrintWriter out = response.getWriter()) {
@@ -118,11 +117,12 @@ public class Kosik extends HttpServlet {
         out.println("    <table class=\"table table-striped\">");
         out.println("        <tbody>");
         int celkovaCenaBezZlavy = 0;
+        int pocet_poloziek = 0;
         try {
             pstmt = con.prepareStatement("SELECT * FROM kosik INNER JOIN sklad ON sklad.ID = ID_tovaru WHERE ID_pouzivatela = ?");
             pstmt.setInt(1, user_id);
             rs = pstmt.executeQuery();
-            
+
             while (rs.next()) {
                 out.println("                <tr>");
                 out.println("                    <td><img src=\"" + getServletContext().getContextPath() + "\\static\\obrazky\\" + rs.getInt("ID_tovaru") + ".jpg\" height=\"73\"</td>");
@@ -135,18 +135,27 @@ public class Kosik extends HttpServlet {
                 out.println("        <button class=\"btn btn-danger m-1\" name=\"odobrat\" type=\"submit\">x</button>");
                 out.println("    </form></td>");
                 out.println("                </tr>");
-                celkovaCenaBezZlavy += (rs.getInt("cena")*rs.getInt("ks"));
+                celkovaCenaBezZlavy += (rs.getInt("cena") * rs.getInt("ks"));
+                pocet_poloziek += 1;
             }
             pstmt.close();
         } catch (SQLException ex) {
             ex.printStackTrace();
         }
-        int celkovaCenaSoZlavou = (int) (celkovaCenaBezZlavy * ((100-Integer.parseInt(session.getAttribute("zlava").toString()))/100.0));
+        int celkovaCenaSoZlavou = (int) (celkovaCenaBezZlavy * ((100 - zlava) / 100.0));
         out.println("        </tbody>");
         out.println("    </table>");
         out.println("    <h4>Cena so zľavou: " + celkovaCenaSoZlavou + "€</h4>");
         out.println("    <h6>Cena bez zľavy: " + celkovaCenaBezZlavy + "€</h6>");
         out.println("    <h6>Zľava: " + session.getAttribute("zlava") + "<span class=\"glyphicon glyphicon-remove\" aria-hidden=\"true\"></span>%</h6>");
+        out.println("    <form action=\"objednavky\" method=\"post\">");
+        out.println("        <input type=\"hidden\" name=\"cena_tovaru\" value=\"" + celkovaCenaSoZlavou + "\">");
+        if (pocet_poloziek > 0) {
+            out.println("        <button class=\"btn btn-success m-1\" name=\"objednat\" type=\"submit\">Objednať</button>");
+        } else {
+            out.println("        <button class=\"btn btn-secondary m-1\" name=\"objednat\" type=\"submit\" disabled>Objednať</button>");
+        }
+        out.println("    </form>");
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">

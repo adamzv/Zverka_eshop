@@ -77,7 +77,7 @@ public class Index extends HttpServlet {
 
         // skontroluje, či je používateľ prihlásený, ak nie je tak ho pošle na login servlet
         Integer user = (Integer) session.getAttribute("user_id");
-        if (user == null) {
+        if (user == null || user_id == null) {
             response.sendRedirect("/eshop/login");
         } else {
             user_id = user;
@@ -101,7 +101,7 @@ public class Index extends HttpServlet {
 
     private void vypis_index(PrintWriter out, String username) {
         out.println("    <div class=\"jumbotron\">");
-        out.println("        <h1 class=\"display-4\">Lorem Ipsum " + username + "</h1>");
+        out.println("        <h1 class=\"display-4\">Lorem Ipsum " + username + " " + user_id + "</h1>");
         out.println("        <p class=\"lead\">This is a simple hero unit, a simple jumbotron-style component for calling extra attention to featured content or information.</p>");
         out.println("        <hr class=\"my-4\">");
         out.println("        <p>It uses utility classes for typography and spacing to space content out within the larger container.</p>");
