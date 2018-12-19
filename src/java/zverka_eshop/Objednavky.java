@@ -221,12 +221,6 @@ public class Objednavky extends HttpServlet {
     }// </editor-fold>
 
     private void vypis_objednavky(PrintWriter out) {
-        out.println("    <div class=\"jumbotron\">");
-        out.println("        <h1 class=\"display-4\">Lorem Ipsum " + username + " " + user_id + "</h1>");
-        out.println("        <p class=\"lead\">This is a simple hero unit, a simple jumbotron-style component for calling extra attention to featured content or information.</p>");
-        out.println("        <hr class=\"my-4\">");
-        out.println("        <p>It uses utility classes for typography and spacing to space content out within the larger container.</p>");
-        out.println("    </div>");
         out.println("    <table class=\"table table-striped\">");
         out.println("        <thead>");
         out.println("            <tr>");
@@ -242,12 +236,28 @@ public class Objednavky extends HttpServlet {
             pstmt.setInt(1, user_id);
             rs = pstmt.executeQuery();
             while (rs.next()) {
-                out.println("                <tr>");
+                out.println("                <tr data-toggle=\"collapse\" data-target=\"." + rs.getString("obj_cislo") + "\" class=\"clickable\">");
                 out.println("                    <td>" + rs.getString("obj_cislo") + "</td>");
                 out.println("                    <td>" + rs.getDate("datum_objednavky") + "</td>");
                 out.println("                    <td>" + rs.getInt("suma") + "</td>");
                 out.println("                    <td>" + rs.getString("stav") + "</td>");
                 out.println("                </tr>");
+                pstmt = con.prepareStatement("SELECT * FROM obj_polozky INNER JOIN sklad ON sklad.ID = ID_tovaru INNER JOIN obj_zoznam ON obj_zoznam.ID = obj_polozky.ID_objednavky WHERE (ID_pouzivatela = ?) AND (obj_cislo = ?)");
+                pstmt.setInt(1, user_id);
+                pstmt.setString(2, rs.getString("obj_cislo"));
+                ResultSet rs_tovar = pstmt.executeQuery();
+                out.println("                <div>");
+                while (rs_tovar.next()) {
+
+                    out.println("                <tr class=\"collapse " + rs.getString("obj_cislo") + "\">");
+                    out.println("                    <td><img src=\"" + getServletContext().getContextPath() + "\\static\\obrazky\\" + rs_tovar.getInt("ID_tovaru") + ".jpg\" height=\"73\"</td>");
+                    out.println("                    <td>" + rs_tovar.getString("nazov") + "</td>");
+                    out.println("                    <td>" + rs_tovar.getInt("ks") + "</td>");
+                    out.println("                    <td>" + rs_tovar.getInt("cena") + "€</td>");
+                    out.println("                </tr>");
+                }
+                out.println("                </div>");
+
             }
             pstmt.close();
         } catch (SQLException ex) {
