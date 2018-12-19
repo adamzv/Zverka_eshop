@@ -246,9 +246,8 @@ public class Objednavky extends HttpServlet {
                 pstmt.setInt(1, user_id);
                 pstmt.setString(2, rs.getString("obj_cislo"));
                 ResultSet rs_tovar = pstmt.executeQuery();
-                out.println("                <div>");
+                // TODO bude potrebné pridať ako samostatnú vnorenú tabuľku
                 while (rs_tovar.next()) {
-
                     out.println("                <tr class=\"collapse " + rs.getString("obj_cislo") + "\">");
                     out.println("                    <td><img src=\"" + getServletContext().getContextPath() + "\\static\\obrazky\\" + rs_tovar.getInt("ID_tovaru") + ".jpg\" height=\"73\"</td>");
                     out.println("                    <td>" + rs_tovar.getString("nazov") + "</td>");
@@ -256,8 +255,6 @@ public class Objednavky extends HttpServlet {
                     out.println("                    <td>" + rs_tovar.getInt("cena") + "€</td>");
                     out.println("                </tr>");
                 }
-                out.println("                </div>");
-
             }
             pstmt.close();
         } catch (SQLException ex) {

@@ -95,6 +95,7 @@ public class Kosik extends HttpServlet {
                 pstmt.executeUpdate();
 
                 pstmt.close();
+                // spraví redirect aby používateľ nemohol cez refresh zopakovať formulár
                 response.sendRedirect("kosik");
             } catch (SQLException ex) {
                 ex.printStackTrace();

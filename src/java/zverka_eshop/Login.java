@@ -82,7 +82,9 @@ public class Login extends HttpServlet {
                     response.sendRedirect("/eshop/login");
                 }
                 ZapamatajUdajeOUserovi(user_id);
-                response.sendRedirect("/eshop/index");
+                String prava = (String) session.getAttribute("prava");
+                if (prava.equals("user")) response.sendRedirect("/eshop/index");
+                else if (prava.equals("admin")) response.sendRedirect("admin");
             }
         } else {
             if (session.getAttribute("user_id") != null) {
