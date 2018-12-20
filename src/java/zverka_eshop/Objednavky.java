@@ -247,6 +247,12 @@ public class Objednavky extends HttpServlet {
                 pstmt.setString(2, rs.getString("obj_cislo"));
                 ResultSet rs_tovar = pstmt.executeQuery();
                 // TODO bude potrebné pridať ako samostatnú vnorenú tabuľku
+                out.println("                <tr class=\"collapse " + rs.getString("obj_cislo") + "\">");
+                    out.println("                    <td></td>");
+                    out.println("                    <td><b>Názov tovaru</b></td>");
+                    out.println("                    <td><b>Počet ks</b></td>");
+                    out.println("                    <td><b>Cena</b></td>");
+                    out.println("                </tr>");
                 while (rs_tovar.next()) {
                     out.println("                <tr class=\"collapse " + rs.getString("obj_cislo") + "\">");
                     out.println("                    <td><img src=\"" + getServletContext().getContextPath() + "\\static\\obrazky\\" + rs_tovar.getInt("ID_tovaru") + ".jpg\" height=\"73\"</td>");

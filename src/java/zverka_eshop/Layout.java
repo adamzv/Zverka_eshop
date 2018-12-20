@@ -36,7 +36,7 @@ public class Layout {
         out.println("    </button>");
         out.println("    <div class=\"collapse navbar-collapse\" id=\"navbar\">");
         if (session.getAttribute("user_id") != null) {
-            if (!session.getAttribute("prava").equals("admin")) {
+            if (session.getAttribute("prava") != null && !session.getAttribute("prava").equals("admin")) {
                 out.println("            <ul class=\"navbar-nav mr-auto mt-2\">");
                 out.println("                <li class=\"nav-item\"><a class=\"nav-link\" href=\"index\">Ponuka</a></li>");
                 out.println("                <li class=\"nav-item\"><a class=\"nav-link\" href=\"kosik\">Košík</a></li>");

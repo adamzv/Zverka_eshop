@@ -80,6 +80,7 @@ public class Login extends HttpServlet {
                 user_id = OverUsera(username, heslo);
                 if (user_id == 0) {
                     response.sendRedirect("/eshop/login");
+                    return;
                 }
                 ZapamatajUdajeOUserovi(user_id);
                 String prava = (String) session.getAttribute("prava");

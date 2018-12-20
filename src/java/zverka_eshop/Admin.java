@@ -81,14 +81,16 @@ public class Admin extends HttpServlet {
             response.sendRedirect("/eshop/login");
         } else {
             // ak používateľ nemá admin práva, pošle ho na index stránku eshopu
-            if (!session.getAttribute("prava").equals("admin")) response.sendRedirect("index");
+            if (!session.getAttribute("prava").equals("admin")) {
+                response.sendRedirect("index");
+            }
             user_id = user;
             username = (String) session.getAttribute("username");
         }
 
         if (request.getMethod().equals("POST")) {
         }
-        
+
         try (PrintWriter out = response.getWriter()) {
             Layout.vypis_html(Layout.ZACIATOK_HTML, out, "Admin");
             Layout.vypis_navbar(out, session);
@@ -107,8 +109,7 @@ public class Admin extends HttpServlet {
         out.println("        <thead>");
         out.println("            <tr>");
         out.println("                <th scope=\"col\">Číslo objednávky</th>");
-        out.println("                <th scope=\"col\">Meno</th>");
-        out.println("                <th scope=\"col\">Priezvisko</th>");
+        out.println("                <th scope=\"col\">Meno, Priezvisko</th>");
         out.println("                <th scope=\"col\">Adresa</th>");
         out.println("                <th scope=\"col\">Dátum objednávky</th>");
         out.println("                <th scope=\"col\">Suma</th>");
@@ -122,23 +123,31 @@ public class Admin extends HttpServlet {
             while (rs.next()) {
                 out.println("                <tr data-toggle=\"collapse\" data-target=\"." + rs.getString("obj_cislo") + "\" class=\"clickable\">");
                 out.println("                    <td>" + rs.getString("obj_cislo") + "</td>");
-                out.println("                    <td>" + rs.getString("meno") + "</td>");
-                out.println("                    <td>" + rs.getString("priezvisko") + "</td>");
+                out.println("                    <td>" + rs.getString("meno") + " " + rs.getString("priezvisko") + "</td>");
                 out.println("                    <td>" + rs.getString("adresa") + "</td>");
                 out.println("                    <td>" + rs.getDate("datum_objednavky") + "</td>");
                 out.println("                    <td>" + rs.getInt("suma") + "</td>");
                 out.println("                    <td>" + rs.getString("stav") + "</td>");
                 out.println("                </tr>");
-                pstmt = con.prepareStatement("SELECT * FROM obj_polozky INNER JOIN sklad ON sklad.ID = ID_tovaru "
-                        + "INNER JOIN obj_zoznam ON obj_zoznam.ID = obj_polozky.ID_objednavky WHERE obj_cislo = ?");
+                pstmt = con.prepareStatement("SELECT * FROM obj_polozky INNER JOIN sklad ON sklad.ID = ID_tovaru INNER JOIN obj_zoznam ON obj_zoznam.ID = obj_polozky.ID_objednavky WHERE obj_cislo = ?");
                 pstmt.setString(1, rs.getString("obj_cislo"));
                 ResultSet rs_tovar = pstmt.executeQuery();
                 // TODO bude potrebné pridať ako samostatnú vnorenú tabuľku
+                out.println("                <tr class=\"collapse " + rs.getString("obj_cislo") + "\">");
+                    out.println("                    <td></td>");
+                    out.println("                    <td></td>");
+                    out.println("                    <td><b>Názov tovaru</b></td>");
+                    out.println("                    <td><b>Počet ks</b></td>");
+                    out.println("                    <td></td>");
+                    out.println("                    <td><b>Cena</b></td>");
+                    out.println("                </tr>");
                 while (rs_tovar.next()) {
                     out.println("                <tr class=\"collapse " + rs.getString("obj_cislo") + "\">");
                     out.println("                    <td><img src=\"" + getServletContext().getContextPath() + "\\static\\obrazky\\" + rs_tovar.getInt("ID_tovaru") + ".jpg\" height=\"73\"</td>");
+                    out.println("                    <td></td>");
                     out.println("                    <td>" + rs_tovar.getString("nazov") + "</td>");
                     out.println("                    <td>" + rs_tovar.getInt("ks") + "</td>");
+                    out.println("                    <td></td>");
                     out.println("                    <td>" + rs_tovar.getInt("cena") + "€</td>");
                     out.println("                </tr>");
                 }
