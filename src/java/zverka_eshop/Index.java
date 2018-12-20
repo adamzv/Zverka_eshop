@@ -82,6 +82,7 @@ public class Index extends HttpServlet {
         } else {
             user_id = user;
             username = (String) session.getAttribute("username");
+            if (session.getAttribute("prava").equals("admin")) response.sendRedirect("admin");
         }
 
         if (request.getMethod().equals("POST")) {

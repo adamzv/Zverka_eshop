@@ -36,28 +36,18 @@ public class Layout {
         out.println("    </button>");
         out.println("    <div class=\"collapse navbar-collapse\" id=\"navbar\">");
         if (session.getAttribute("user_id") != null) {
-            out.println("            <ul class=\"navbar-nav mr-auto mt-2\">");
-            out.println("                <li class=\"nav-item\"><a class=\"nav-link\" href=\"index\">Ponuka</a></li>");
-            out.println("                <li class=\"nav-item\"><a class=\"nav-link\" href=\"kosik\">Košík</a></li>");
-            out.println("                <li class=\"nav-item\"><a class=\"nav-link\" href=\"objednavky\">Objednávky</a></li>");
-            out.println("            </ul>");
+            if (!session.getAttribute("prava").equals("admin")) {
+                out.println("            <ul class=\"navbar-nav mr-auto mt-2\">");
+                out.println("                <li class=\"nav-item\"><a class=\"nav-link\" href=\"index\">Ponuka</a></li>");
+                out.println("                <li class=\"nav-item\"><a class=\"nav-link\" href=\"kosik\">Košík</a></li>");
+                out.println("                <li class=\"nav-item\"><a class=\"nav-link\" href=\"objednavky\">Objednávky</a></li>");
+                out.println("            </ul>");
+            }
         }
         out.println();
         out.println("            <ul class=\"navbar-nav ml-auto mt-2\">");
         if (session.getAttribute("user_id") != null) {
-            out.println("                <li class=\"dropdown\">");
-            out.println("                    <a href=\"#\" class=\"dropdown-toggle nav-link\" data-toggle=\"dropdown\" role=\"button\"");
-            out.println("                       aria-haspopup=\"true\"");
-            out.println("                       aria-expanded=\"false\" id=\"dropdown\">" + session.getAttribute("username") + "<span class=\"caret\"></span></a>");
-            out.println("                    <div class=\"dropdown-menu dropdown-menu-right\" aria-labelledby=\"dropdown\">");
-            out.println("                        <a class=\"dropdown-item nav-link disabled\" href=\"#\">Nastavenia</a>");
-            out.println("                        <a class=\"dropdown-item nav-link\" href=\"objednavky\">Objednávky</a>");
-            if (session.getAttribute("prava").equals("admin")) {
-                out.println("                        <a class=\"dropdown-item nav-link\" href=\"admin\">Admin</a>");
-            }
-            out.println("                        <a class=\"dropdown-item nav-link\" href=\"logout\">Odhlásiť sa</a>");
-            out.println("                    </div>");
-            out.println("                </li>");
+            out.println("                <li class=\"nav-item\"><a class=\"nav-link\" href=\"logout\">Odhlásiť sa</a></li>");
         } else {
             out.println("                <li class=\"nav-item\"><a class=\"nav-link\" href=\"login\">Prihlásiť sa</a></li>");
         }
