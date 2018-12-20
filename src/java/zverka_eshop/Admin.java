@@ -107,6 +107,9 @@ public class Admin extends HttpServlet {
         out.println("        <thead>");
         out.println("            <tr>");
         out.println("                <th scope=\"col\">Číslo objednávky</th>");
+        out.println("                <th scope=\"col\">Meno</th>");
+        out.println("                <th scope=\"col\">Priezvisko</th>");
+        out.println("                <th scope=\"col\">Adresa</th>");
         out.println("                <th scope=\"col\">Dátum objednávky</th>");
         out.println("                <th scope=\"col\">Suma</th>");
         out.println("                <th scope=\"col\">Stav</th>");
@@ -114,16 +117,20 @@ public class Admin extends HttpServlet {
         out.println("        </thead>");
         out.println("        <tbody>");
         try {
-            pstmt = con.prepareStatement("SELECT * FROM obj_zoznam");
+            pstmt = con.prepareStatement("SELECT * FROM obj_zoznam INNER JOIN pouzivatelia ON pouzivatelia.ID = obj_zoznam.ID_pouzivatela");
             rs = pstmt.executeQuery();
             while (rs.next()) {
                 out.println("                <tr data-toggle=\"collapse\" data-target=\"." + rs.getString("obj_cislo") + "\" class=\"clickable\">");
                 out.println("                    <td>" + rs.getString("obj_cislo") + "</td>");
+                out.println("                    <td>" + rs.getString("meno") + "</td>");
+                out.println("                    <td>" + rs.getString("priezvisko") + "</td>");
+                out.println("                    <td>" + rs.getString("adresa") + "</td>");
                 out.println("                    <td>" + rs.getDate("datum_objednavky") + "</td>");
                 out.println("                    <td>" + rs.getInt("suma") + "</td>");
                 out.println("                    <td>" + rs.getString("stav") + "</td>");
                 out.println("                </tr>");
-                pstmt = con.prepareStatement("SELECT * FROM obj_polozky INNER JOIN sklad ON sklad.ID = ID_tovaru INNER JOIN obj_zoznam ON obj_zoznam.ID = obj_polozky.ID_objednavky WHERE obj_cislo = ?");
+                pstmt = con.prepareStatement("SELECT * FROM obj_polozky INNER JOIN sklad ON sklad.ID = ID_tovaru "
+                        + "INNER JOIN obj_zoznam ON obj_zoznam.ID = obj_polozky.ID_objednavky WHERE obj_cislo = ?");
                 pstmt.setString(1, rs.getString("obj_cislo"));
                 ResultSet rs_tovar = pstmt.executeQuery();
                 // TODO bude potrebné pridať ako samostatnú vnorenú tabuľku
