@@ -164,8 +164,8 @@ public class Admin extends HttpServlet {
                 out.println("                    <td class=\"align-middle\">" + rs.getString("stav") + "</td>");
                 out.println("                    <td><form action=\"admin\" method=\"post\" class=\"form-inline\"><select class=\"form-control mr-2 col-lg\" name=\"zmenit_stav\">");
                 out.println("                       <option value=\"zaplatene\">zaplatené</option>");
+                out.println("                       <option value=\"spracované\">spracované</option>");
                 out.println("                       <option value=\"odoslane\">odoslané</option>");
-                out.println("                       <option value=\"dorucene\">doručené</option>");
                 out.println("                       </select>");
                 out.println("                       <input type=\"hidden\" name=\"formular\" value=\"zmenit_stav\">");
                 out.println("                       <input type=\"hidden\" name=\"cislo_objednavky\" value=\"" + rs.getString("obj_cislo") + "\">");
