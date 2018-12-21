@@ -105,7 +105,20 @@ public class Admin extends HttpServlet {
                     ex.printStackTrace();
                 }
             } else {
+                String stav = request.getParameter("zmenit_stav");
+                String obj_cislo = request.getParameter("cislo_objednavky");
+                try {
+                    if (stav != null) {
+                        pstmt = con.prepareStatement("UPDATE obj_zoznam SET stav = ? WHERE obj_cislo = ?");
+                        pstmt.setString(1, stav);
+                        pstmt.setString(2, obj_cislo);
+                        pstmt.executeUpdate();
 
+                        response.sendRedirect("admin");
+                    }
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
             }
         }
 
@@ -115,8 +128,6 @@ public class Admin extends HttpServlet {
             out.println("    <div class=\"jumbotron\">");
             out.println("        <h1 class=\"display-4\">Admin rozhranie</h1>");
             out.println("        <p class=\"lead\">Admin: " + username + "</p>");
-            out.println("        <hr class=\"my-4\">");
-            out.println("        <p class=\"lead\">Poznámka: kliknutím na objednávku sa zobrazia položky objednávky</p>");
             out.println("    </div>");
             vypis_objednavky(out);
             vypis_pouzivatelov(out);
@@ -136,6 +147,7 @@ public class Admin extends HttpServlet {
         out.println("                <th scope=\"col\">Dátum objednávky</th>");
         out.println("                <th scope=\"col\">Suma</th>");
         out.println("                <th scope=\"col\">Stav</th>");
+        out.println("                <th scope=\"col\">Zmeniť stav</th>");
         out.println("            </tr>");
         out.println("        </thead>");
         out.println("        <tbody>");
@@ -143,13 +155,24 @@ public class Admin extends HttpServlet {
             pstmt = con.prepareStatement("SELECT * FROM obj_zoznam INNER JOIN pouzivatelia ON pouzivatelia.ID = obj_zoznam.ID_pouzivatela");
             rs = pstmt.executeQuery();
             while (rs.next()) {
-                out.println("                <tr data-toggle=\"collapse\" data-target=\"." + rs.getString("obj_cislo") + "\" class=\"clickable\">");
-                out.println("                    <td>" + rs.getString("obj_cislo") + "</td>");
-                out.println("                    <td>" + rs.getString("meno") + " " + rs.getString("priezvisko") + "</td>");
-                out.println("                    <td>" + rs.getString("adresa") + "</td>");
-                out.println("                    <td>" + rs.getDate("datum_objednavky") + "</td>");
-                out.println("                    <td>" + rs.getInt("suma") + "</td>");
-                out.println("                    <td>" + rs.getString("stav") + "</td>");
+                out.println("                <tr>");
+                out.println("                    <td class=\"align-middle\">" + rs.getString("obj_cislo") + "</td>");
+                out.println("                    <td class=\"align-middle\">" + rs.getString("meno") + " " + rs.getString("priezvisko") + "</td>");
+                out.println("                    <td class=\"align-middle\">" + rs.getString("adresa") + "</td>");
+                out.println("                    <td class=\"align-middle\">" + rs.getDate("datum_objednavky") + "</td>");
+                out.println("                    <td class=\"align-middle\">" + rs.getInt("suma") + "</td>");
+                out.println("                    <td class=\"align-middle\">" + rs.getString("stav") + "</td>");
+                out.println("                    <td><form action=\"admin\" method=\"post\" class=\"form-inline\"><select class=\"form-control mr-2 col-lg\" name=\"zmenit_stav\">");
+                out.println("                       <option value=\"zaplatene\">zaplatené</option>");
+                out.println("                       <option value=\"odoslane\">odoslané</option>");
+                out.println("                       <option value=\"dorucene\">doručené</option>");
+                out.println("                       </select>");
+                out.println("                       <input type=\"hidden\" name=\"formular\" value=\"zmenit_stav\">");
+                out.println("                       <input type=\"hidden\" name=\"cislo_objednavky\" value=\"" + rs.getString("obj_cislo") + "\">");
+                out.println("                       <button class=\"btn btn-success form-control col-lg\" name=\"potvrdit\" type=\"submit\">Potvrdiť</button>");
+                out.println("                       <button class=\"btn btn-secondary form-control clickable ml-3\" data-toggle=\"collapse\" data-target=\"." + rs.getString("obj_cislo") + "\" type=\"button\"><i class=\"fas fa-angle-down\"></i></button>");
+                out.println("                       ");
+                out.println("                       </form></td>");
                 out.println("                </tr>");
                 pstmt = con.prepareStatement("SELECT * FROM obj_polozky INNER JOIN sklad ON sklad.ID = ID_tovaru INNER JOIN obj_zoznam ON obj_zoznam.ID = obj_polozky.ID_objednavky WHERE obj_cislo = ?");
                 pstmt.setString(1, rs.getString("obj_cislo"));
@@ -160,7 +183,7 @@ public class Admin extends HttpServlet {
                 out.println("                    <td><b>Názov tovaru</b></td>");
                 out.println("                    <td><b>Počet ks</b></td>");
                 out.println("                    <td></td>");
-                out.println("                    <td><b>Cena</b></td>");
+                out.println("                    <td colspan=\"2\"><b>Cena</b></td>");
                 out.println("                </tr>");
                 while (rs_tovar.next()) {
                     out.println("                <tr class=\"collapse " + rs.getString("obj_cislo") + "\">");
@@ -169,7 +192,7 @@ public class Admin extends HttpServlet {
                     out.println("                    <td>" + rs_tovar.getString("nazov") + "</td>");
                     out.println("                    <td>" + rs_tovar.getInt("ks") + "</td>");
                     out.println("                    <td></td>");
-                    out.println("                    <td>" + rs_tovar.getInt("cena") + "€</td>");
+                    out.println("                    <td colspan=\"2\">" + rs_tovar.getInt("cena") + "€</td>");
                     out.println("                </tr>");
                 }
             }

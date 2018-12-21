@@ -73,6 +73,8 @@ public class Layout {
                 out.println();
                 out.println("    <link href=\"https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css\" rel=\"stylesheet\"/>");
                 out.println("    <link href=\"/static/styles.css\" rel=\"stylesheet\"/>");
+                out.println("    <link rel=\"stylesheet\" href=\"https://use.fontawesome.com/releases/v5.6.3/css/all.css\" integrity=\"sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/\" crossorigin=\"anonymous\">");
+                
                 out.println();
                 out.println("    <script src=\"https://code.jquery.com/jquery-3.1.1.min.js\"></script>");
                 out.println("    <script src=\"https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js\"></script>");
