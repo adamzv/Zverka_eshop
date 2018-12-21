@@ -134,8 +134,7 @@ public class Admin extends HttpServlet {
                 ResultSet rs_tovar = pstmt.executeQuery();
                 // TODO bude potrebné pridať ako samostatnú vnorenú tabuľku
                 out.println("                <tr class=\"collapse " + rs.getString("obj_cislo") + "\">");
-                    out.println("                    <td></td>");
-                    out.println("                    <td></td>");
+                    out.println("                    <td colspan=\"2\"></td>");
                     out.println("                    <td><b>Názov tovaru</b></td>");
                     out.println("                    <td><b>Počet ks</b></td>");
                     out.println("                    <td></td>");

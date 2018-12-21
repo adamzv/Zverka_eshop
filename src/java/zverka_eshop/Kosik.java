@@ -116,6 +116,15 @@ public class Kosik extends HttpServlet {
 
     private void vypis_kosik(PrintWriter out) {
         out.println("    <table class=\"table table-striped\">");
+        out.println("        <thead>");
+        out.println("            <tr>");
+        out.println("                <th scope=\"col\"></th>");
+        out.println("                <th scope=\"col\">Názov</th>");
+        out.println("                <th scope=\"col\">Počet ks</th>");
+        out.println("                <th scope=\"col\">Cena</th>");
+        out.println("                <th scope=\"col\">Odobrať</th>");
+        out.println("            </tr>");
+        out.println("        </thead>");
         out.println("        <tbody>");
         int celkovaCenaBezZlavy = 0;
         int pocet_poloziek = 0;
@@ -129,8 +138,7 @@ public class Kosik extends HttpServlet {
                 out.println("                    <td><img src=\"" + getServletContext().getContextPath() + "\\static\\obrazky\\" + rs.getInt("ID_tovaru") + ".jpg\" height=\"73\"</td>");
                 out.println("                    <td>" + rs.getString("nazov") + "</td>");
                 out.println("                    <td>" + rs.getInt("ks") + "</td>");
-                out.println("                    <td>" + rs.getInt("ceout.println(\"        </tbody>\");\n" +
-"        out.println(\"    </table>\");na") + "€</td>");
+                out.println("                    <td>" + rs.getInt("cena") + "€</td>");
                 out.println("    <td><form action=\"kosik\" method=\"post\">");
                 out.println("        <input type=\"hidden\" name=\"cena_tovaru\" value=\"" + rs.getInt("cena") + "\">");
                 out.println("        <input type=\"hidden\" name=\"id_tovaru\" value=\"" + rs.getInt("ID_tovaru") + "\">");
