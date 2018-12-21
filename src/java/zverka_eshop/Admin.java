@@ -89,6 +89,24 @@ public class Admin extends HttpServlet {
         }
 
         if (request.getMethod().equals("POST")) {
+            if (request.getParameter("formular").equals("zmenit_prava")) {
+                String prava = request.getParameter("vybrat_prava");
+                int id_pouzivatela = Integer.parseInt(request.getParameter("id_pouzivatela"));
+                try {
+                    if (prava != null) {
+                        pstmt = con.prepareStatement("UPDATE pouzivatelia SET prava = ? WHERE ID = ?");
+                        pstmt.setString(1, prava);
+                        pstmt.setInt(2, id_pouzivatela);
+                        pstmt.executeUpdate();
+
+                        response.sendRedirect("admin");
+                    }
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+            } else {
+
+            }
         }
 
         try (PrintWriter out = response.getWriter()) {
@@ -219,10 +237,23 @@ public class Admin extends HttpServlet {
             pstmt = con.prepareStatement("SELECT ID, login, mail, prava FROM pouzivatelia");
             rs = pstmt.executeQuery();
             while (rs.next()) {
+                String prava = rs.getString("prava");
                 out.println("                <tr>");
-                out.println("                    <td>" + rs.getString("login") + "</td>");
-                out.println("                    <td>" + rs.getString("mail") + "</td>");
-                out.println("                    <td>" + rs.getString("prava") + "</td>");
+                out.println("                    <td class=\"align-middle\">" + rs.getString("login") + "</td>");
+                out.println("                    <td class=\"align-middle\">" + rs.getString("mail") + "</td>");
+                out.println("                    <td class=\"align-middle\">" + rs.getString("prava") + "</td>");
+                out.println("                    <td><form id=\"prava_pouzivatela\" action=\"admin\" method=\"post\" class=\"form-inline\"><select class=\"form-control mr-2 col-lg\" name=\"vybrat_prava\">");
+                out.println("                       <option value=\"" + prava + "\" disabled selected>" + prava + "</option>");
+                if (prava.equals("user")) {
+                    out.println("                       <option value=\"admin\">admin</option>");
+                } else {
+                    out.println("                       <option value=\"user\">user</option>");
+                }
+                out.println("                       </select>");
+                out.println("                       <input type=\"hidden\" name=\"formular\" value=\"zmenit_prava\">");
+                out.println("                       <input type=\"hidden\" name=\"id_pouzivatela\" value=\"" + rs.getInt("ID") + "\">");
+                out.println("                       <button class=\"btn btn-success form-control col-lg\" name=\"potvrdit\" type=\"submit\">Potvrdiť</button>");
+                out.println("                       </form></td>");
                 out.println("                </tr>");
             }
             pstmt.close();
