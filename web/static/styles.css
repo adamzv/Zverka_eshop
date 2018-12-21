@@ -8,15 +8,14 @@ and open the template in the editor.
     Author     : adamz
 */
 
-main .form-control
-{
+main .form-control {
     display: inline-block;
 
 }
 
-main
-{
+main {
     overflow-x: auto;
 
     text-align: center;
 }
+

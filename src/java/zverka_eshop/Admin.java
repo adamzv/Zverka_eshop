@@ -94,17 +94,21 @@ public class Admin extends HttpServlet {
         try (PrintWriter out = response.getWriter()) {
             Layout.vypis_html(Layout.ZACIATOK_HTML, out, "Admin");
             Layout.vypis_navbar(out, session);
-            vypis_admin(out);
+            out.println("    <div class=\"jumbotron\">");
+            out.println("        <h1 class=\"display-4\">Admin rozhranie</h1>");
+            out.println("        <p class=\"lead\">Admin: " + username + "</p>");
+            out.println("        <hr class=\"my-4\">");
+            out.println("        <p class=\"lead\">Poznámka: kliknutím na objednávku sa zobrazia položky objednávky</p>");
+            out.println("    </div>");
+            vypis_objednavky(out);
+            vypis_pouzivatelov(out);
             Layout.vypis_footer(out);
             Layout.vypis_html(Layout.KONIEC_HTML, out);
         }
     }
 
-    private void vypis_admin(PrintWriter out) {
-        out.println("    <div class=\"jumbotron\">");
-        out.println("        <h1 class=\"display-4\">Admin rozhranie</h1>");
-        out.println("        <p class=\"lead\">Admin: " + username + "</p>");
-        out.println("    </div>");
+    private void vypis_objednavky(PrintWriter out) {
+        out.println("        <p><h2>Objednávky</h2></p>");
         out.println("    <table class=\"table table-striped\">");
         out.println("        <thead>");
         out.println("            <tr>");
@@ -134,12 +138,12 @@ public class Admin extends HttpServlet {
                 ResultSet rs_tovar = pstmt.executeQuery();
                 // TODO bude potrebné pridať ako samostatnú vnorenú tabuľku
                 out.println("                <tr class=\"collapse " + rs.getString("obj_cislo") + "\">");
-                    out.println("                    <td colspan=\"2\"></td>");
-                    out.println("                    <td><b>Názov tovaru</b></td>");
-                    out.println("                    <td><b>Počet ks</b></td>");
-                    out.println("                    <td></td>");
-                    out.println("                    <td><b>Cena</b></td>");
-                    out.println("                </tr>");
+                out.println("                    <td colspan=\"2\"></td>");
+                out.println("                    <td><b>Názov tovaru</b></td>");
+                out.println("                    <td><b>Počet ks</b></td>");
+                out.println("                    <td></td>");
+                out.println("                    <td><b>Cena</b></td>");
+                out.println("                </tr>");
                 while (rs_tovar.next()) {
                     out.println("                <tr class=\"collapse " + rs.getString("obj_cislo") + "\">");
                     out.println("                    <td><img src=\"" + getServletContext().getContextPath() + "\\static\\obrazky\\" + rs_tovar.getInt("ID_tovaru") + ".jpg\" height=\"73\"</td>");
@@ -198,5 +202,36 @@ public class Admin extends HttpServlet {
     public String getServletInfo() {
         return "Short description";
     }// </editor-fold>
+
+    private void vypis_pouzivatelov(PrintWriter out) {
+        out.println("        <p><h2>Objednávky</h2></p>");
+        out.println("    <table class=\"table table-striped\">");
+        out.println("        <thead>");
+        out.println("            <tr>");
+        out.println("                <th scope=\"col\">Login</th>");
+        out.println("                <th scope=\"col\">Mail</th>");
+        out.println("                <th scope=\"col\">Práva</th>");
+        out.println("                <th scope=\"col\">Zmeniť práva</th>");
+        out.println("            </tr>");
+        out.println("        </thead>");
+        out.println("        <tbody>");
+        try {
+            pstmt = con.prepareStatement("SELECT ID, login, mail, prava FROM pouzivatelia");
+            rs = pstmt.executeQuery();
+            while (rs.next()) {
+                out.println("                <tr>");
+                out.println("                    <td>" + rs.getString("login") + "</td>");
+                out.println("                    <td>" + rs.getString("mail") + "</td>");
+                out.println("                    <td>" + rs.getString("prava") + "</td>");
+                out.println("                </tr>");
+            }
+            pstmt.close();
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+
+        out.println("        </tbody>");
+        out.println("    </table>");
+    }
 
 }
