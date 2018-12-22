@@ -30,14 +30,10 @@ import javax.servlet.http.HttpSession;
 @WebServlet(name = "Objednavky", urlPatterns = {"/objednavky"})
 public class Objednavky extends HttpServlet {
 
-    String driver = "com.mysql.jdbc.Driver";
     Connection con = null;
     Statement stmt = null;
     PreparedStatement pstmt = null;
     ResultSet rs = null;
-    String db_username = "root";
-    String db_password = "";
-    String URL = "jdbc:mysql://localhost/zverka_eshop";
 
     SimpleDateFormat dateFormat;
     HttpSession session;
@@ -49,8 +45,7 @@ public class Objednavky extends HttpServlet {
     public void init() {
         try {
             super.init();
-            Class.forName(driver);
-            con = DriverManager.getConnection(URL, db_username, db_password);
+            Class.forName(Login.driver);
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -60,7 +55,9 @@ public class Objednavky extends HttpServlet {
     public void destroy() {
         super.destroy();
         try {
-            con.close();
+            if (!con.isClosed()) {
+                con.close();
+            }
         } catch (SQLException ex) {
         }
     }
@@ -77,7 +74,7 @@ public class Objednavky extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         session = request.getSession();
-
+        con = Login.dajSpojenie(request);
         // skontroluje, či je používateľ prihlásený, ak nie je tak ho pošle na login servlet
         Integer user = (Integer) session.getAttribute("user_id");
         if (user == null || user_id == null) {

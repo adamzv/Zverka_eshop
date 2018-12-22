@@ -27,15 +27,10 @@ import javax.servlet.http.HttpSession;
 @WebServlet(name = "Admin", urlPatterns = {"/admin"})
 public class Admin extends HttpServlet {
 
-    String driver = "com.mysql.jdbc.Driver";
     Connection con = null;
     Statement stmt = null;
     PreparedStatement pstmt = null;
     ResultSet rs = null;
-    String db_username = "root";
-    String db_password = "";
-    String URL = "jdbc:mysql://localhost/zverka_eshop";
-
     HttpSession session;
     Integer user_id = 0;
     String username = null;
@@ -44,8 +39,7 @@ public class Admin extends HttpServlet {
     public void init() {
         try {
             super.init();
-            Class.forName(driver);
-            con = DriverManager.getConnection(URL, db_username, db_password);
+            Class.forName(Login.driver);
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -55,7 +49,9 @@ public class Admin extends HttpServlet {
     public void destroy() {
         super.destroy();
         try {
-            con.close();
+            if (!con.isClosed()) {
+                con.close();
+            }
         } catch (SQLException ex) {
         }
     }
@@ -74,7 +70,7 @@ public class Admin extends HttpServlet {
         response.setContentType("text/html;charset=UTF-8");
 
         session = request.getSession();
-
+        con = Login.dajSpojenie(request);
         // skontroluje, či je používateľ prihlásený, ak nie je tak ho pošle na login servlet
         Integer user = (Integer) session.getAttribute("user_id");
         if (user == null || user_id == null) {

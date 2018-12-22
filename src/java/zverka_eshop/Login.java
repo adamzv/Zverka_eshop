@@ -23,27 +23,26 @@ import javax.servlet.http.HttpSession;
  *
  * @author adamz
  */
-@WebServlet(name = "Login", urlPatterns = {"","/login"})
+@WebServlet(name = "Login", urlPatterns = {"", "/login"})
 public class Login extends HttpServlet {
 
-    String driver = "com.mysql.jdbc.Driver";
+    static String driver = "com.mysql.jdbc.Driver";
     Connection con = null;
     PreparedStatement pstmt = null;
     ResultSet rs = null;
-    String db_username = "root";
-    String db_password = "";
-    String URL = "jdbc:mysql://localhost/zverka_eshop";
-    
+    static String db_username = "root";
+    static String db_password = "";
+    static String URL = "jdbc:mysql://localhost/zverka_eshop";
+
     HttpSession session;
 
     Integer user_id = 0;
-    
+
     @Override
     public void init() {
         try {
             super.init();
             Class.forName(driver);
-            con = DriverManager.getConnection(URL, db_username, db_password);
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -53,10 +52,13 @@ public class Login extends HttpServlet {
     public void destroy() {
         super.destroy();
         try {
-            con.close();
+            if (!con.isClosed()) {
+                con.close();
+            }
         } catch (SQLException ex) {
         }
     }
+
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
@@ -68,7 +70,6 @@ public class Login extends HttpServlet {
      */
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        
         session = request.getSession();
         if (session.isNew()) {
             user_id = 0;
@@ -76,6 +77,7 @@ public class Login extends HttpServlet {
         if (request.getMethod().equals("POST")) {
             String username = request.getParameter("username");
             String heslo = request.getParameter("heslo");
+            con = dajSpojenie(request);
             if (user_id == 0) {
                 user_id = OverUsera(username, heslo);
                 if (user_id == 0) {
@@ -84,15 +86,18 @@ public class Login extends HttpServlet {
                 }
                 ZapamatajUdajeOUserovi(user_id);
                 String prava = (String) session.getAttribute("prava");
-                if (prava.equals("user")) response.sendRedirect("/eshop/index");
-                else if (prava.equals("admin")) response.sendRedirect("admin");
+                if (prava.equals("user")) {
+                    response.sendRedirect("/eshop/index");
+                } else if (prava.equals("admin")) {
+                    response.sendRedirect("admin");
+                }
             }
         } else {
             if (session.getAttribute("user_id") != null) {
                 response.sendRedirect("/eshop/index");
             }
         }
-        
+
         response.setContentType("text/html;charset=UTF-8");
         try (PrintWriter out = response.getWriter()) {
             Layout.vypis_html(Layout.ZACIATOK_HTML, out, "Login");
@@ -112,7 +117,7 @@ public class Login extends HttpServlet {
             pstmt.setString(1, username);
             pstmt.setString(2, heslo);
             rs = pstmt.executeQuery();
-            
+
             rs.next();
             if (rs.getInt("pocet") == 1) {
                 vysledok = rs.getInt("iid");
@@ -124,16 +129,16 @@ public class Login extends HttpServlet {
         }
         return vysledok;
     }
-    
+
     private void ZapamatajUdajeOUserovi(int id) {
         try {
             // dopisat dalsie udaje do session?
             pstmt = con.prepareStatement("SELECT login, prava, zlava FROM pouzivatelia WHERE ID = ?");
             pstmt.setString(1, String.valueOf(id));
             rs = pstmt.executeQuery();
-            
+
             rs.next();
-            
+
             session.setAttribute("user_id", (Integer) id);
             session.setAttribute("username", rs.getString("login"));
             session.setAttribute("prava", rs.getString("prava"));
@@ -144,7 +149,21 @@ public class Login extends HttpServlet {
             ex.printStackTrace();
         }
     }
-    
+
+    public static Connection dajSpojenie(HttpServletRequest request) {
+        try {
+            HttpSession session = request.getSession();
+            Connection con = (Connection) session.getAttribute("spojenie");
+            if (con == null) {
+                con = DriverManager.getConnection(Login.URL, Login.db_username, Login.db_password);
+                session.setAttribute("spojenie", con);
+            }
+            return con;
+        } catch (Exception ex) {
+            return null;
+        }
+    }
+
     private void vypis_login(PrintWriter out) {
         out.println("    <form action=\"/eshop/login\" method=\"post\">");
         out.println("        <div class=\"form-row\">");
@@ -162,7 +181,7 @@ public class Login extends HttpServlet {
         out.println("            <div class=\"mx-auto\">");
         out.println("                <button class=\"btn btn-primary m-1\" type=\"submit\">Prihlásiť sa</button>");
         out.println("                <p class=\"m-1\">");
-        out.println("                    <a href=\"/registracia\">Vytvoriť nový účet</a>");
+        out.println("                    <a href=\"registracia\">Vytvoriť nový účet</a>");
         out.println("                </p>");
         out.println("            </div>");
         out.println("        </div>");

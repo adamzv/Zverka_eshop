@@ -26,22 +26,16 @@ import javax.servlet.http.HttpSession;
 @WebServlet(name = "Registracia", urlPatterns = {"/registracia"})
 public class Registracia extends HttpServlet {
 
-    String driver = "com.mysql.jdbc.Driver";
     Connection con = null;
     PreparedStatement pstmt = null;
     ResultSet rs = null;
-    String db_username = "root";
-    String db_password = "";
-    String URL = "jdbc:mysql://localhost/zverka_eshop";
-
     HttpSession session;
 
     @Override
     public void init() {
         try {
             super.init();
-            Class.forName(driver);
-            con = DriverManager.getConnection(URL, db_username, db_password);
+            Class.forName(Login.driver);
         } catch (Exception ex) {
         }
     }
@@ -50,7 +44,9 @@ public class Registracia extends HttpServlet {
     public void destroy() {
         super.destroy();
         try {
-            con.close();
+            if (!con.isClosed()) {
+                con.close();
+            }
         } catch (SQLException ex) {
         }
     }
@@ -68,7 +64,7 @@ public class Registracia extends HttpServlet {
             throws ServletException, IOException {
 
         session = request.getSession(false);
-        
+        con = Login.dajSpojenie(request);
         if (request.getMethod().equals("POST")) {
             String username = request.getParameter("username");
             String heslo = request.getParameter("heslo");
@@ -92,7 +88,7 @@ public class Registracia extends HttpServlet {
                     } else {
                         int zlava = (int) (Math.random() * 51);
                         String registracia = "INSERT INTO pouzivatelia (login, heslo, mail, adresa, zlava, meno, priezvisko) VALUES (?, ?, ?, ?, ?, ?, ?)";
-                        
+
                         PreparedStatement pstmta = con.prepareStatement(registracia);
                         pstmta.setString(1, username);
                         pstmta.setString(2, heslo);
