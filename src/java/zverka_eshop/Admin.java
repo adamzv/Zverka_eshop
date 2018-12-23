@@ -8,7 +8,6 @@ package zverka_eshop;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -45,17 +44,6 @@ public class Admin extends HttpServlet {
         }
     }
 
-    @Override
-    public void destroy() {
-        super.destroy();
-        try {
-            if (!con.isClosed()) {
-                con.close();
-            }
-        } catch (SQLException ex) {
-        }
-    }
-
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
@@ -68,7 +56,6 @@ public class Admin extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
-
         session = request.getSession();
         con = Login.dajSpojenie(request);
         // skontroluje, či je používateľ prihlásený, ak nie je tak ho pošle na login servlet

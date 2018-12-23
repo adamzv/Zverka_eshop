@@ -10,12 +10,10 @@ and open the template in the editor.
 
 main .form-control {
     display: inline-block;
-
 }
 
 main {
     overflow-x: auto;
-
     text-align: center;
 }
 

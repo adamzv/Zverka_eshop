@@ -47,18 +47,7 @@ public class Login extends HttpServlet {
             ex.printStackTrace();
         }
     }
-
-    @Override
-    public void destroy() {
-        super.destroy();
-        try {
-            if (!con.isClosed()) {
-                con.close();
-            }
-        } catch (SQLException ex) {
-        }
-    }
-
+    
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
@@ -165,6 +154,7 @@ public class Login extends HttpServlet {
     }
 
     private void vypis_login(PrintWriter out) {
+        out.println("<div class=\"container\">");
         out.println("    <form action=\"/eshop/login\" method=\"post\">");
         out.println("        <div class=\"form-row\">");
         out.println("            <div class=\"col-md-4 mx-auto my-1\">");
@@ -180,12 +170,13 @@ public class Login extends HttpServlet {
         out.println("        <div class=\"form-row\">");
         out.println("            <div class=\"mx-auto\">");
         out.println("                <button class=\"btn btn-primary m-1\" type=\"submit\">Prihlásiť sa</button>");
-        out.println("                <p class=\"m-1\">");
-        out.println("                    <a href=\"registracia\">Vytvoriť nový účet</a>");
+        out.println("                <p class=\"text-center\">");
+        out.println("                    <a href=\"registracia\">Registrovať</a>");
         out.println("                </p>");
         out.println("            </div>");
         out.println("        </div>");
         out.println("    </form>");
+        out.println("</div>");
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">

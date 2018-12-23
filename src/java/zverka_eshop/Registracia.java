@@ -8,7 +8,6 @@ package zverka_eshop;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -37,17 +36,6 @@ public class Registracia extends HttpServlet {
             super.init();
             Class.forName(Login.driver);
         } catch (Exception ex) {
-        }
-    }
-
-    @Override
-    public void destroy() {
-        super.destroy();
-        try {
-            if (!con.isClosed()) {
-                con.close();
-            }
-        } catch (SQLException ex) {
         }
     }
 

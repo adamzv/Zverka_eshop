@@ -51,15 +51,6 @@ public class Index extends HttpServlet {
         }
     }
 
-    @Override
-    public void destroy() {
-        super.destroy();
-        try {
-            con.close();
-        } catch (SQLException ex) {
-        }
-    }
-
     /**
      * Processes requests for both HTTP <code>GET</code> and <code>POST</code>
      * methods.
@@ -72,7 +63,6 @@ public class Index extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
-
         session = request.getSession();
 
         // skontroluje, či je používateľ prihlásený, ak nie je tak ho pošle na login servlet
@@ -107,7 +97,8 @@ public class Index extends HttpServlet {
         out.println("        <hr class=\"my-4\">");
         out.println("        <p>It uses utility classes for typography and spacing to space content out within the larger container.</p>");
         out.println("    </div>");
-        out.println("    <table class=\"table table-striped\">");
+        out.println("    <div class=\"container\">");
+        out.println("    <table class=\"table table-striped table-bordered\">");
         out.println("        <thead>");
         out.println("            <tr>");
         out.println("                <th scope=\"col\"></th>");
@@ -131,7 +122,7 @@ public class Index extends HttpServlet {
                 out.println("                    <td>" + rs.getString("vyrobca") + "</td>");
                 out.println("                    <td>" + rs.getInt("ks") + "</td>");
                 out.println("                    <td>" + rs.getInt("cena") + "€</td>");
-                out.println("    <td><form action=\"index\" method=\"post\">");
+                out.println("    <td><form action=\"index\" method=\"post\" class=\"form-inline\">");
                 out.println("        <input type=\"number\" name=\"pocet\" class=\"form-control\" min=\"1\" value=\"1\">");
                 out.println("        <input type=\"hidden\" name=\"cena_tovaru\" value=\"" + rs.getInt("cena") + "\">");
                 out.println("        <input type=\"hidden\" name=\"id_tovaru\" value=\"" + rs.getInt("ID") + "\">");
@@ -146,6 +137,7 @@ public class Index extends HttpServlet {
 
         out.println("        </tbody>");
         out.println("    </table>");
+        out.println("    </div>");
     }
 
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">

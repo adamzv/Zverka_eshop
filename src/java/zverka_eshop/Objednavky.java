@@ -8,7 +8,6 @@ package zverka_eshop;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -48,17 +47,6 @@ public class Objednavky extends HttpServlet {
             Class.forName(Login.driver);
         } catch (Exception ex) {
             ex.printStackTrace();
-        }
-    }
-
-    @Override
-    public void destroy() {
-        super.destroy();
-        try {
-            if (!con.isClosed()) {
-                con.close();
-            }
-        } catch (SQLException ex) {
         }
     }
 
