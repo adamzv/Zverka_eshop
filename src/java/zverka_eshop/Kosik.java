@@ -140,9 +140,9 @@ public class Kosik extends HttpServlet {
         int celkovaCenaSoZlavou = (int) (celkovaCenaBezZlavy * ((100 - zlava) / 100.0));
         out.println("        </tbody>");
         out.println("    </table>");
-        out.println("    <h4>Cena so zľavou: " + celkovaCenaSoZlavou + "€</h4>");
-        out.println("    <h6>Cena bez zľavy: " + celkovaCenaBezZlavy + "€</h6>");
-        out.println("    <h6>Zľava: " + session.getAttribute("zlava") + "<span class=\"glyphicon glyphicon-remove\" aria-hidden=\"true\"></span>%</h6>");
+        out.println("    <h4 class=\"ml-2\">Cena so zľavou: " + celkovaCenaSoZlavou + "€</h4>");
+        out.println("    <h6 class=\"ml-2\">Cena bez zľavy: " + celkovaCenaBezZlavy + "€</h6>");
+        out.println("    <h6 class=\"ml-2\">Zľava: " + session.getAttribute("zlava") + "<span class=\"glyphicon glyphicon-remove\" aria-hidden=\"true\"></span>%</h6>");
         out.println("    <form action=\"objednavky\" method=\"post\">");
         out.println("        <input type=\"hidden\" name=\"cena_tovaru\" value=\"" + celkovaCenaSoZlavou + "\">");
         if (pocet_poloziek > 0) {

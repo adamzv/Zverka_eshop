@@ -92,10 +92,9 @@ public class Index extends HttpServlet {
 
     private void vypis_index(PrintWriter out, String username) {
         out.println("    <div class=\"jumbotron\">");
-        out.println("        <h1 class=\"display-4\">Lorem Ipsum " + username + " " + user_id + "</h1>");
-        out.println("        <p class=\"lead\">This is a simple hero unit, a simple jumbotron-style component for calling extra attention to featured content or information.</p>");
+        out.println("        <h1 class=\"display-4\">Vitajte, " + username +".</h1>");
+        out.println("        </br>");
         out.println("        <hr class=\"my-4\">");
-        out.println("        <p>It uses utility classes for typography and spacing to space content out within the larger container.</p>");
         out.println("    </div>");
         out.println("    <div class=\"container\">");
         out.println("    <table class=\"table table-striped table-bordered\">");

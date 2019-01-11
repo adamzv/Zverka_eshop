@@ -37,7 +37,7 @@ public class Layout {
         out.println("    <div class=\"collapse navbar-collapse\" id=\"navbar\">");
         if (session.getAttribute("user_id") != null) {
             if (session.getAttribute("prava") != null && !session.getAttribute("prava").equals("admin")) {
-                out.println("            <ul class=\"navbar-nav mr-auto mt-2\">");
+                out.println("            <ul class=\"navbar-nav mr-auto\">");
                 out.println("                <li class=\"nav-item\"><a class=\"nav-link\" href=\"index\">Ponuka</a></li>");
                 out.println("                <li class=\"nav-item\"><a class=\"nav-link\" href=\"kosik\">Košík</a></li>");
                 out.println("                <li class=\"nav-item\"><a class=\"nav-link\" href=\"objednavky\">Objednávky</a></li>");
@@ -45,7 +45,7 @@ public class Layout {
             }
         }
         out.println();
-        out.println("            <ul class=\"navbar-nav ml-auto mt-2\">");
+        out.println("            <ul class=\"navbar-nav ml-auto\">");
         if (session.getAttribute("user_id") != null) {
             out.println("                <li class=\"nav-item\"><a class=\"nav-link\" href=\"logout\">Odhlásiť sa</a></li>");
         } else {
@@ -58,7 +58,7 @@ public class Layout {
 
     public static void vypis_footer(PrintWriter out) {
         out.println("<footer class=\"small text-center text-muted\">");
-        out.println("    jShop Zverka 2018 (KI/OT/15)");
+        out.println("    Adam Zverka 2018 (KI/OT/15)");
         out.println("</footer>");
     }
 

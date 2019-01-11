@@ -206,6 +206,7 @@ public class Objednavky extends HttpServlet {
     }// </editor-fold>
 
     private void vypis_objednavky(PrintWriter out) {
+        out.println("    <p class=\"mt-2\"><span class=\"ml-2\">Kliknutím na riadok tabuľky sa zobrazia všetky položky objednávky.</span></p>");
         out.println("    <table class=\"table table-striped\">");
         out.println("        <thead>");
         out.println("            <tr>");

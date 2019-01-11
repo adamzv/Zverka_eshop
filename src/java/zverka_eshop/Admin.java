@@ -120,7 +120,7 @@ public class Admin extends HttpServlet {
     }
 
     private void vypis_objednavky(PrintWriter out) {
-        out.println("        <p><h2>Objednávky</h2></p>");
+        out.println("        <p><h2 class=\"ml-2\">Objednávky</h2></p>");
         out.println("    <table class=\"table table-striped\">");
         out.println("        <thead>");
         out.println("            <tr>");
@@ -228,7 +228,7 @@ public class Admin extends HttpServlet {
     }// </editor-fold>
 
     private void vypis_pouzivatelov(PrintWriter out) {
-        out.println("        <p><h2>Objednávky</h2></p>");
+        out.println("        <p><h2 class=\"ml-2\">Používatelia</h2></p>");
         out.println("    <table class=\"table table-striped\">");
         out.println("        <thead>");
         out.println("            <tr>");

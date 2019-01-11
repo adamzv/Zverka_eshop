@@ -103,13 +103,13 @@ public class Registracia extends HttpServlet {
         try (PrintWriter out = response.getWriter()) {
             Layout.vypis_html(Layout.ZACIATOK_HTML, out, "Registracia");
             Layout.vypis_navbar(out, session);
-            vypis_registraciu(out, session);
+            vypis_registraciu(out);
             Layout.vypis_footer(out);
             Layout.vypis_html(Layout.KONIEC_HTML, out);
         }
     }
 
-    private void vypis_registraciu(PrintWriter out, HttpSession session) {
+    private void vypis_registraciu(PrintWriter out) {
         out.println("    <form action=\"/eshop/registracia\" method=\"post\">");
         out.println("        <div class=\"form-row\">");
         out.println("            <div class=\"col-md-4 mx-auto my-1\">");
