@@ -90,9 +90,8 @@ public class Admin extends HttpServlet {
             } else if (request.getParameter("formular").equals("odstranit_obj")) {
                 String obj_cislo = request.getParameter("cislo_objednavky");
                 // získanie id objednávky
-                
+
                 // odstránenie položiek z tabuľky obj_polozky
-                
                 // odstránenie objednávky z tabuľky 
             } else {
                 String stav = request.getParameter("zmenit_stav");
@@ -118,6 +117,7 @@ public class Admin extends HttpServlet {
             out.println("    <div class=\"jumbotron\">");
             out.println("        <h1 class=\"display-4\">Admin rozhranie</h1>");
             out.println("        <p class=\"lead\">Admin: " + username + "</p>");
+            out.println("        <p>Kliknutím na riadok tabuľky sa zobrazia všetky položky objednávky.</p>");
             out.println("    </div>");
             vypis_objednavky(out);
             vypis_pouzivatelov(out);
@@ -138,7 +138,6 @@ public class Admin extends HttpServlet {
         out.println("                <th scope=\"col\">Suma</th>");
         out.println("                <th scope=\"col\">Stav</th>");
         out.println("                <th scope=\"col\">Zmeniť stav</th>");
-        out.println("                <th scope=\"col\"></th>");
         out.println("            </tr>");
         out.println("        </thead>");
         out.println("        <tbody>");
@@ -146,7 +145,7 @@ public class Admin extends HttpServlet {
             pstmt = con.prepareStatement("SELECT * FROM obj_zoznam INNER JOIN pouzivatelia ON pouzivatelia.ID = obj_zoznam.ID_pouzivatela");
             rs = pstmt.executeQuery();
             while (rs.next()) {
-                out.println("                <tr>");
+                out.println("                <tr data-toggle=\"collapse\" data-target=\"." + rs.getString("obj_cislo") + "\" class=\"clickable\">");
                 out.println("                    <td class=\"align-middle\">" + rs.getString("obj_cislo") + "</td>");
                 out.println("                    <td class=\"align-middle\">" + rs.getString("meno") + " " + rs.getString("priezvisko") + "</td>");
                 out.println("                    <td class=\"align-middle\">" + rs.getString("adresa") + "</td>");
@@ -161,10 +160,9 @@ public class Admin extends HttpServlet {
                 out.println("                       <input type=\"hidden\" name=\"formular\" value=\"zmenit_stav\">");
                 out.println("                       <input type=\"hidden\" name=\"cislo_objednavky\" value=\"" + rs.getString("obj_cislo") + "\">");
                 out.println("                       <button class=\"btn btn-success form-control col-lg\" name=\"potvrdit\" type=\"submit\">Potvrdiť</button>");
-                out.println("                       <button class=\"btn btn-secondary form-control clickable ml-3\" data-toggle=\"collapse\" data-target=\"." + rs.getString("obj_cislo") + "\" type=\"button\"><i class=\"fas fa-angle-down\"></i></button>");
                 out.println("                       ");
                 out.println("                       </form></td>");
-                out.println("                    <td><form action=\"admin\" class=\"form-inline\" method=\"post\" name=\"odstranit_obj\">");
+                out.println("                       <td><form action=\"admin\" class=\"form-inline\" method=\"post\" name=\"odstranit_obj\">");
                 out.println("                           <input type=\"hidden\" name=\"obj_cislo\" value=\"" + rs.getString("obj_cislo") + "\">");
                 out.println("                           <button class=\"btn btn-danger form-control\" name=\"odobrat\" type=\"submit\">x</button>");
                 out.println("                       </form></td>");
@@ -172,13 +170,13 @@ public class Admin extends HttpServlet {
                 pstmt = con.prepareStatement("SELECT * FROM obj_polozky INNER JOIN sklad ON sklad.ID = ID_tovaru INNER JOIN obj_zoznam ON obj_zoznam.ID = obj_polozky.ID_objednavky WHERE obj_cislo = ?");
                 pstmt.setString(1, rs.getString("obj_cislo"));
                 ResultSet rs_tovar = pstmt.executeQuery();
-                // TODO bude potrebné pridať ako samostatnú vnorenú tabuľku
                 out.println("                <tr class=\"collapse " + rs.getString("obj_cislo") + "\">");
                 out.println("                    <td colspan=\"2\"></td>");
                 out.println("                    <td><b>Názov tovaru</b></td>");
                 out.println("                    <td><b>Počet ks</b></td>");
                 out.println("                    <td></td>");
                 out.println("                    <td colspan=\"2\"><b>Cena</b></td>");
+                out.println("                    <td></td>");
                 out.println("                </tr>");
                 while (rs_tovar.next()) {
                     out.println("                <tr class=\"collapse " + rs.getString("obj_cislo") + "\">");
@@ -188,6 +186,7 @@ public class Admin extends HttpServlet {
                     out.println("                    <td>" + rs_tovar.getInt("ks") + "</td>");
                     out.println("                    <td></td>");
                     out.println("                    <td colspan=\"2\">" + rs_tovar.getInt("cena") + "€</td>");
+                    out.println("                    <td></td>");
                     out.println("                </tr>");
                 }
             }
