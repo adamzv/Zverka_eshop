@@ -87,6 +87,13 @@ public class Admin extends HttpServlet {
                 } catch (SQLException ex) {
                     ex.printStackTrace();
                 }
+            } else if (request.getParameter("formular").equals("odstranit_obj")) {
+                String obj_cislo = request.getParameter("cislo_objednavky");
+                // získanie id objednávky
+                
+                // odstránenie položiek z tabuľky obj_polozky
+                
+                // odstránenie objednávky z tabuľky 
             } else {
                 String stav = request.getParameter("zmenit_stav");
                 String obj_cislo = request.getParameter("cislo_objednavky");
@@ -131,6 +138,7 @@ public class Admin extends HttpServlet {
         out.println("                <th scope=\"col\">Suma</th>");
         out.println("                <th scope=\"col\">Stav</th>");
         out.println("                <th scope=\"col\">Zmeniť stav</th>");
+        out.println("                <th scope=\"col\"></th>");
         out.println("            </tr>");
         out.println("        </thead>");
         out.println("        <tbody>");
@@ -155,6 +163,10 @@ public class Admin extends HttpServlet {
                 out.println("                       <button class=\"btn btn-success form-control col-lg\" name=\"potvrdit\" type=\"submit\">Potvrdiť</button>");
                 out.println("                       <button class=\"btn btn-secondary form-control clickable ml-3\" data-toggle=\"collapse\" data-target=\"." + rs.getString("obj_cislo") + "\" type=\"button\"><i class=\"fas fa-angle-down\"></i></button>");
                 out.println("                       ");
+                out.println("                       </form></td>");
+                out.println("                    <td><form action=\"admin\" class=\"form-inline\" method=\"post\" name=\"odstranit_obj\">");
+                out.println("                           <input type=\"hidden\" name=\"obj_cislo\" value=\"" + rs.getString("obj_cislo") + "\">");
+                out.println("                           <button class=\"btn btn-danger form-control\" name=\"odobrat\" type=\"submit\">x</button>");
                 out.println("                       </form></td>");
                 out.println("                </tr>");
                 pstmt = con.prepareStatement("SELECT * FROM obj_polozky INNER JOIN sklad ON sklad.ID = ID_tovaru INNER JOIN obj_zoznam ON obj_zoznam.ID = obj_polozky.ID_objednavky WHERE obj_cislo = ?");
