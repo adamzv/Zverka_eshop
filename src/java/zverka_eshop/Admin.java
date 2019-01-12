@@ -88,11 +88,30 @@ public class Admin extends HttpServlet {
                     ex.printStackTrace();
                 }
             } else if (request.getParameter("formular").equals("odstranit_obj")) {
-                String obj_cislo = request.getParameter("cislo_objednavky");
-                // získanie id objednávky
+                String obj_cislo = request.getParameter("obj_cislo");
+                try {
+                    if (obj_cislo != null) {
+                        // získanie id objednávky
+                        pstmt = con.prepareStatement("SELECT ID FROM obj_zoznam WHERE obj_cislo = ?");
+                        pstmt.setString(1, obj_cislo);
+                        rs = pstmt.executeQuery();
+                        // odstránenie položiek z tabuľky obj_polozky
+                        rs.first();
+                        int id_objednavky = rs.getInt("ID");
+                        pstmt = con.prepareStatement("DELETE FROM obj_polozky WHERE ID_objednavky = ?");
+                        pstmt.setInt(1, id_objednavky);
+                        pstmt.executeUpdate();
+                        // odstránenie objednávky z tabuľky
+                        pstmt = con.prepareStatement("DELETE FROM obj_zoznam WHERE obj_cislo = ?");
+                        pstmt.setString(1, obj_cislo);
+                        pstmt.executeUpdate();
+                        
+                        response.sendRedirect("admin");
+                    }
 
-                // odstránenie položiek z tabuľky obj_polozky
-                // odstránenie objednávky z tabuľky 
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
             } else {
                 String stav = request.getParameter("zmenit_stav");
                 String obj_cislo = request.getParameter("cislo_objednavky");
@@ -162,7 +181,8 @@ public class Admin extends HttpServlet {
                 out.println("                       <button class=\"btn btn-success form-control col-lg\" name=\"potvrdit\" type=\"submit\">Potvrdiť</button>");
                 out.println("                       ");
                 out.println("                       </form></td>");
-                out.println("                       <td><form action=\"admin\" class=\"form-inline\" method=\"post\" name=\"odstranit_obj\">");
+                out.println("                       <td><form action=\"admin\" class=\"form-inline\" method=\"post\" name=\"formular\">");
+                out.println("                           <input type=\"hidden\" name=\"formular\" value=\"odstranit_obj\">");
                 out.println("                           <input type=\"hidden\" name=\"obj_cislo\" value=\"" + rs.getString("obj_cislo") + "\">");
                 out.println("                           <button class=\"btn btn-danger form-control\" name=\"odobrat\" type=\"submit\">x</button>");
                 out.println("                       </form></td>");
